@@ -353,9 +353,7 @@ class Client:
                 self.company_mailing_address = "Not found"
                 self.company_mailing_city = "Not found"
                 self.company_mailing_state = "Not found"
-                self.company_mailing_zip = "Not found"
-        
-        
+                self.company_mailing_zip = "Not found"    
     
     @staticmethod
     def center_text(text, width):
@@ -688,10 +686,10 @@ def create_csv_file(postcards_list, client):
         "Credibility Logo 2 URL",
         "Credibility Logo 3 URL",
         "Credibility Logo 4 URL",
-        "Font Color 1",
-        "Font Color 2",
-        "Font Color 3",
-        "Font Color 4",
+        "font_color_1",
+        "font_color_2",
+        "font_color_3",
+        "font_color_4",
         "Block Color 1",
         "Block Color 2"
     ]    
@@ -773,10 +771,10 @@ def create_csv_file(postcards_list, client):
                 "Credibility Logo 2 URL":       postcard.credibility_logo_2_url,
                 "Credibility Logo 3 URL":       postcard.credibility_logo_3_url,
                 "Credibility Logo 4 URL":       postcard.credibility_logo_4_url,
-                "Font Color 1":                 postcard.font_color_1,
-                "Font Color 2":                 postcard.font_color_2,
-                "Font Color 3":                 postcard.font_color_3,
-                "Font Color 4":                 postcard.font_color_4,
+                "font_color_1":                 postcard.font_color_1,
+                "font_color_2":                 postcard.font_color_2,
+                "font_color_3":                 postcard.font_color_3,
+                "font_color_4":                 postcard.font_color_4,
                 "Block Color 1":                postcard.block_color_1,
                 "Block Color 2":                postcard.block_color_2
             })
