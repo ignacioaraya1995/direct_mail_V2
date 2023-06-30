@@ -3,20 +3,19 @@ import re
 import json
 import random
 import os
-
+import sys
 
 INPUT_CLIENTS_DATA      = 'input/clientsData.csv'
 INPUT_COLORS_RULES      = 'input/colorsRule.csv'
 INPUT_MARKETING_LIST    = 'input/marketingList.csv'
 INPUT_POSTCARD_RULES    = 'input/postcardRules.csv'
-CLIENT_NAME             = 'LVN Real Estate'
+INPUT_CLIENTS_LOGOS     = 'input/clientsLogos.csv'
+INPUT_CLIENTS_ADDRESS   = 'input/clientAddress.csv'
 OUTPUT_FILE_NAME        = 'results.csv'
-
 DEBUG_MODE = False
 
-
 class PostcardsList:
-    def __init__(self, postcard_name=None, postcard_number=None,company_name=None, company_phone_number=None,
+    def __init__(self, property_data, postcard_name=None, postcard_number=None,company_name=None, company_phone_number=None,
                  company_mailing_address=None, company_mailing_city=None, company_mailing_state=None,
                  company_mailing_zip=None, company_website=None, testimonial_name=None,
                  investor_full_name=None, targeted_message_1=None, targeted_message_2=None,
@@ -29,6 +28,7 @@ class PostcardsList:
                  font_color_1 = None, font_color_2 = None, font_color_3 = None, font_color_4 = None, 
                  block_color_1 = None, block_color_2 = None
                  ):
+        self.property_data = property_data
         self.postcard_name = postcard_name
         self.postcard_number = postcard_number
         self.company_name = company_name
@@ -144,6 +144,15 @@ class PostcardsList:
         self.owner_mailing_zip =        propertyData.mailing_zip
         self.total_value =              add_thousands_separator(propertyData.total_value)
 
+    def assign_credibility_logos(self):
+        with open(INPUT_CLIENTS_LOGOS, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['Company Name'] == self.company_name and row['Type'].startswith('Credibility Logo'):
+                    logo_number = str(row['Type'].replace("URL","").split()[-1])
+                    attribute_name = f"credibility_logo_{logo_number}_url"
+                    setattr(self, attribute_name, row['Logo_url'])
+
 class PropertyData:
     def __init__(self, folio, owner_full_name, owner_first_name, owner_last_name, address, city, state, zip_code, county,
                  mailing_address, mailing_city, mailing_state, mailing_zip, golden_address, golden_city, golden_state,
@@ -223,7 +232,7 @@ class Client:
         self.contact_phone = contact_phone
         self.mailing_address = mailing_address
         self.website = website
-        self.logo = logo
+        self.logo = self.lookup_company_logo_url()
         self.tracking_numbers = tracking_numbers
         self.demographic = demographic
         self.postcard_quantity = postcard_quantity
@@ -242,6 +251,7 @@ class Client:
         self.postcard_designs = postcard_designs
         self.additional_comments = additional_comments
         self.share_results = share_results
+        self.get_client_address()
     
     def __str__(self):
         table = f"""
@@ -319,6 +329,34 @@ class Client:
 
         print("=== End of Insights ===")
 
+    def lookup_company_logo_url(self):
+        with open(INPUT_CLIENTS_LOGOS, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['Company Name'] == self.company_name and row['Type'] == "Company":
+                    return row['Logo_url']
+        return ""
+    
+    def get_client_address(self):
+        with open(INPUT_CLIENTS_ADDRESS, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['Company Name'] == self.company_name:
+                    self.company_mailing_address = row['Company Mailing Address']
+                    self.company_mailing_city = row['Company Mailing City']
+                    self.company_mailing_state = row['Company Mailing State']
+                    self.company_mailing_zip = row['Company Mailing ZIP']
+                    break
+            else:
+                # Handle the case where the company name is not found
+                # Set default values or perform any necessary actions
+                self.company_mailing_address = "Not found"
+                self.company_mailing_city = "Not found"
+                self.company_mailing_state = "Not found"
+                self.company_mailing_zip = "Not found"
+        
+        
+    
     @staticmethod
     def center_text(text, width):
         return text.center(width)
@@ -403,12 +441,13 @@ def read_marketing_list_csv(file_name):
             action_plans = row['ACTION PLANS']
             property_status = row['PROPERTY STATUS']
             score = row['SCORE']
-            distress_points = row['DISTRESS POINTS']
-            avatar = row['AVATAR']
+            distress_points = row['LIKELY DEAL SCORE']
+            avatar = row['BUYBOX SCORE']
+            total_value = int(row['TOTAL VALUE'].replace('$', '').replace(',', ''))
             property_type = row['PROPERTY TYPE']
             link_properties = row['LINK PROPERTIES']
-            hidden_gems = row['HIDDEN GEMS?']
             tags = row['TAGS']
+            hidden_gems = row['HIDDENGEMS']
             absentee = row['ABSENTEE']
             high_equity = row['HIGH EQUITY']
             downsizing = row['DOWNSIZING']
@@ -428,12 +467,7 @@ def read_marketing_list_csv(file_name):
             thirty_sixty_days = row['30-60 DAYS']
             judgment = row['JUDGEMENT']
             debt_collection = row['DEBT COLLECTION']
-            total_value = int(row['Total Value'].replace('$', '').replace(',', ''))
-            num_sms = int(row['# of SMS'])
-            num_dm = int(row['# of DM'])
-            num_cold_call = int(row['# of Cold Call'])
-            seller_avatar_group = row['Seller Avatar (Group)']
-            targeted_testimonial = row['Targeted Testimonial']
+            num_dm = int(row['MARKETING DM COUNT'])
             main_distress_1 = row['MAIN DISTRESS #1']
             main_distress_2 = row['MAIN DISTRESS #2']
             main_distress_3 = row['MAIN DISTRESS #3']
@@ -442,7 +476,9 @@ def read_marketing_list_csv(file_name):
             targeted_message_2 = row['TARGETED MESSAGE #2']
             targeted_message_3 = row['TARGETED MESSAGE #3']
             targeted_message_4 = row['TARGETED MESSAGE #4']
-            
+            targeted_group_name = row['TARGETED GROUP NAME']
+            targeted_group_message = row['TARGETED GROUP MESSAGE']
+
             property_data = PropertyData(folio, owner_full_name, owner_first_name, owner_last_name, address, city,
                                          state, zip_code, county, mailing_address, mailing_city, mailing_state,
                                          mailing_zip, golden_address, golden_city, golden_state, golden_zip_code,
@@ -450,12 +486,11 @@ def read_marketing_list_csv(file_name):
                                          link_properties, hidden_gems, tags, absentee, high_equity, downsizing,
                                          pre_foreclosure, vacant, fifty_five_plus, estate, inter_family_transfer,
                                          divorce, taxes, probate, low_credit, code_violations, bankruptcy, liens,
-                                         eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_sms,
-                                         num_dm, num_cold_call, seller_avatar_group, targeted_testimonial,
+                                         eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_dm,
+                                         num_dm, num_dm, targeted_group_name, targeted_group_message,
                                          main_distress_1, main_distress_2, main_distress_3, main_distress_4,
                                          targeted_message_1, targeted_message_2, targeted_message_3, targeted_message_4)
             marketing_list.append(property_data)
-
     return marketing_list
 
 def extract_tracking_number(tracking_number):
@@ -490,6 +525,7 @@ def load_postcard_rules(fileName):
     return rules_data
 
 def get_template_for_property(property_data):
+    # load_sequence_step
     sequence_step = (property_data.num_dm % 4) + 1
     rules_data = load_postcard_rules(csv_to_json(INPUT_POSTCARD_RULES))
     for rule in rules_data:
@@ -577,76 +613,207 @@ def generate_qr_code_url(url):
     qr_code_url = base_url + "?" + "&".join(f"{key}={value}" for key, value in params.items())
     return qr_code_url
 
-def create_csv_file(postcards_list, filename):
-    fieldnames = ["Postcard Name", "Postcard Number","Company Name", "Company Phone Number", "Company Mailing Address",
-                  "Company Mailing City", "Company Mailing State", "Company Mailing ZIP", "Company website",
-                  "Testimonial Name", "Investor Full Name", "Targeted Message 1", "Targeted Message 2",
-                  "Targeted Message 3", "Targeted Testimonial", "Owner Full name", "Owner First Name",
-                  "Owner Property Address", "Owner Mailing Address", "Owner Mailing City", "Owner Mailing State",
-                  "Owner Mailing ZIP", "Total Value", "Company Logo URL", "Google Street View URL", "Image URL",
-                  "QR Code URL", "Credibility Logo 1 URL", "Credibility Logo 2 URL", "Credibility Logo 3 URL",
-                  "Credibility Logo 4 URL", "Font Color 1", "Font Color 2", "Font Color 3", "Font Color 4",
-                  "Block Color 1", "Block Color 2"]
-
-    with open(filename, "w", newline="") as file:
+def create_csv_file(postcards_list, client):
+    fieldnames = [
+        "FOLIO",
+        "OWNER FULL NAME",
+        "OWNER FIRST NAME",
+        "OWNER LAST NAME",
+        "ADDRESS",
+        "CITY",
+        "STATE",
+        "ZIP",
+        "COUNTY",
+        "MAILING ADDRESS",
+        "MAILING CITY",
+        "MAILING STATE",
+        "MAILING ZIP",
+        "GOLDEN ADDRESS",
+        "GOLDEN CITY",
+        "GOLDEN STATE",
+        "GOLDEN ZIP CODE",
+        "ACTION PLANS",
+        "PROPERTY STATUS",
+        "SCORE",
+        "LIKELY DEAL SCORE",
+        "BUYBOX SCORE",
+        "TOTAL VALUE",
+        "PROPERTY TYPE",
+        "LINK PROPERTIES",
+        "TAGS",
+        "HIDDENGEMS",
+        "ABSENTEE",
+        "HIGH EQUITY",
+        "DOWNSIZING",
+        "PRE-FORECLOSURE",
+        "VACANT",
+        "55+",
+        "ESTATE",
+        "INTER FAMILY TRANSFER",
+        "DIVORCE",
+        "TAXES",
+        "PROBATE",
+        "LOW CREDIT",
+        "CODE VIOLATIONS",
+        "BANKRUPTCY",
+        "LIENS",
+        "EVICTION",
+        "30-60 DAYS",
+        "JUDGEMENT",
+        "DEBT COLLECTION",
+        "MARKETING DM COUNT",
+        "MAIN DISTRESS #1",
+        "MAIN DISTRESS #2",
+        "MAIN DISTRESS #3",
+        "MAIN DISTRESS #4",
+        "TARGETED MESSAGE #1",
+        "TARGETED MESSAGE #2",
+        "TARGETED MESSAGE #3",
+        "TARGETED MESSAGE #4",
+        "TARGETED GROUP NAME",
+        "TARGETED GROUP MESSAGE",
+        "Postcard Name",
+        "Company Name",
+        "Company Phone Number",
+        "Company Mailing Address",
+        "Company Mailing City",
+        "Company Mailing State",
+        "Company Mailing ZIP",
+        "Company website",
+        "Testimonial Name",
+        "Investor Full Name",
+        "Company Logo URL",
+        "QR Code URL",
+        "Credibility Logo 1 URL",
+        "Credibility Logo 2 URL",
+        "Credibility Logo 3 URL",
+        "Credibility Logo 4 URL",
+        "Font Color 1",
+        "Font Color 2",
+        "Font Color 3",
+        "Font Color 4",
+        "Block Color 1",
+        "Block Color 2"
+    ]    
+    with open("output/" + client.company_name + "/MktList-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
-
         for postcard in postcards_list:
             writer.writerow({
-                "Postcard Name": postcard.postcard_name,
-                "Postcard Number": postcard.postcard_number,
-                "Company Name": postcard.company_name,
-                "Company Phone Number": postcard.company_phone_number,
-                "Company Mailing Address": postcard.company_mailing_address,
-                "Company Mailing City": postcard.company_mailing_city,
-                "Company Mailing State": postcard.company_mailing_state,
-                "Company Mailing ZIP": postcard.company_mailing_zip,
-                "Company website": postcard.company_website,
-                "Testimonial Name": postcard.testimonial_name,
-                "Investor Full Name": postcard.investor_full_name,
-                "Targeted Message 1": postcard.targeted_message_1,
-                "Targeted Message 2": postcard.targeted_message_2,
-                "Targeted Message 3": postcard.targeted_message_3,
-                "Targeted Testimonial": postcard.targeted_testimonial,
-                "Owner Full name": postcard.owner_full_name,
-                "Owner First Name": postcard.owner_first_name,
-                "Owner Property Address": postcard.owner_property_address,
-                "Owner Mailing Address": postcard.owner_mailing_address,
-                "Owner Mailing City": postcard.owner_mailing_city,
-                "Owner Mailing State": postcard.owner_mailing_state,
-                "Owner Mailing ZIP": postcard.owner_mailing_zip,
-                "Total Value": postcard.total_value,
-                "Company Logo URL": postcard.company_logo_url,
-                "Google Street View URL": postcard.google_street_view_url,
-                "Image URL": postcard.image_url,
-                "QR Code URL": postcard.qr_code_url,
-                "Credibility Logo 1 URL": postcard.credibility_logo_1_url,
-                "Credibility Logo 2 URL": postcard.credibility_logo_2_url,
-                "Credibility Logo 3 URL": postcard.credibility_logo_3_url,
-                "Credibility Logo 4 URL": postcard.credibility_logo_4_url,
-                "Font Color 1": postcard.font_color_1,
-                "Font Color 2": postcard.font_color_2,
-                "Font Color 3": postcard.font_color_3,
-                "Font Color 4": postcard.font_color_4,
-                "Block Color 1": postcard.block_color_1,
-                "Block Color 2": postcard.block_color_2
+                "FOLIO":                        postcard.property_data.folio,
+                "OWNER FULL NAME":              postcard.property_data.owner_full_name,
+                "OWNER FIRST NAME":             postcard.property_data.owner_first_name,
+                "OWNER LAST NAME":              postcard.property_data.owner_last_name,
+                "ADDRESS":                      postcard.property_data.address,
+                "CITY":                         postcard.property_data.city,
+                "STATE":                        postcard.property_data.state,
+                "ZIP":                          postcard.property_data.zip_code,
+                "COUNTY":                       postcard.property_data.county,
+                "MAILING ADDRESS":              postcard.property_data.mailing_address,
+                "MAILING CITY":                 postcard.property_data.mailing_city,
+                "MAILING STATE":                postcard.property_data.mailing_state,
+                "MAILING ZIP":                  postcard.property_data.mailing_zip,
+                "GOLDEN ADDRESS":               postcard.property_data.golden_address,
+                "GOLDEN CITY":                  postcard.property_data.golden_city,
+                "GOLDEN STATE":                 postcard.property_data.golden_state,
+                "GOLDEN ZIP CODE":              postcard.property_data.golden_zip_code,
+                "ACTION PLANS":                 postcard.property_data.action_plans,
+                "PROPERTY STATUS":              postcard.property_data.property_status,
+                "SCORE":                        postcard.property_data.score,
+                "LIKELY DEAL SCORE":            postcard.property_data.distress_points,
+                "BUYBOX SCORE":                 postcard.property_data.avatar,
+                "TOTAL VALUE":                  postcard.property_data.total_value,
+                "PROPERTY TYPE":                postcard.property_data.property_type,
+                "LINK PROPERTIES":              postcard.property_data.link_properties,
+                "TAGS":                         postcard.property_data.tags,
+                "HIDDENGEMS":                   postcard.property_data.hidden_gems,
+                "ABSENTEE":                     postcard.property_data.absentee,
+                "HIGH EQUITY":                  postcard.property_data.high_equity,
+                "DOWNSIZING":                   postcard.property_data.downsizing,
+                "PRE-FORECLOSURE":              postcard.property_data.pre_foreclosure,
+                "VACANT":                       postcard.property_data.vacant,
+                "55+":                          postcard.property_data.fifty_five_plus,
+                "ESTATE":                       postcard.property_data.estate,
+                "INTER FAMILY TRANSFER":        postcard.property_data.inter_family_transfer,
+                "DIVORCE":                      postcard.property_data.divorce,
+                "TAXES":                        postcard.property_data.taxes,
+                "PROBATE":                      postcard.property_data.probate,
+                "LOW CREDIT":                   postcard.property_data.low_credit,
+                "CODE VIOLATIONS":              postcard.property_data.code_violations,
+                "BANKRUPTCY":                   postcard.property_data.bankruptcy,
+                "LIENS":                        postcard.property_data.liens,
+                "EVICTION":                     postcard.property_data.eviction,
+                "30-60 DAYS":                   postcard.property_data.thirty_sixty_days,
+                "JUDGEMENT":                    postcard.property_data.judgment,
+                "DEBT COLLECTION":              postcard.property_data.debt_collection,
+                "MARKETING DM COUNT":           postcard.property_data.num_dm,
+                "MAIN DISTRESS #1":             postcard.property_data.main_distress_1,
+                "MAIN DISTRESS #2":             postcard.property_data.main_distress_2,
+                "MAIN DISTRESS #3":             postcard.property_data.main_distress_3,
+                "MAIN DISTRESS #4":             postcard.property_data.main_distress_4,
+                "TARGETED MESSAGE #1":          postcard.property_data.targeted_message_1,
+                "TARGETED MESSAGE #2":          postcard.property_data.targeted_message_2,
+                "TARGETED MESSAGE #3":          postcard.property_data.targeted_message_3,
+                "TARGETED MESSAGE #4":          postcard.property_data.targeted_message_4,
+                "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group,
+                "TARGETED GROUP MESSAGE":       postcard.property_data.targeted_testimonial,
+                "Postcard Name":                "T" + postcard.postcard_number,
+                "Company Name":                 postcard.company_name,
+                "Company Phone Number":         postcard.company_phone_number,
+                "Company Mailing Address":      client.company_mailing_address,
+                "Company Mailing City":         client.company_mailing_city,
+                "Company Mailing State":        client.company_mailing_state,
+                "Company Mailing ZIP":          client.company_mailing_zip,
+                "Company website":              postcard.company_website,
+                "Testimonial Name":             postcard.testimonial_name,
+                "Investor Full Name":           postcard.investor_full_name,
+                "Company Logo URL":             postcard.company_logo_url,
+                "QR Code URL":                  postcard.qr_code_url,
+                "Credibility Logo 1 URL":       postcard.credibility_logo_1_url,
+                "Credibility Logo 2 URL":       postcard.credibility_logo_2_url,
+                "Credibility Logo 3 URL":       postcard.credibility_logo_3_url,
+                "Credibility Logo 4 URL":       postcard.credibility_logo_4_url,
+                "Font Color 1":                 postcard.font_color_1,
+                "Font Color 2":                 postcard.font_color_2,
+                "Font Color 3":                 postcard.font_color_3,
+                "Font Color 4":                 postcard.font_color_4,
+                "Block Color 1":                postcard.block_color_1,
+                "Block Color 2":                postcard.block_color_2
             })
+
+def create_client_folder(client):
+    folder_name = client.company_name
+    folder_path = os.path.join("output/", folder_name)
+
+    try:
+        # Comprueba si la carpeta ya existe
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            return folder_path
+        else:
+            return folder_path
+    except OSError as e:
+        print(f"Error al crear la carpeta '{folder_name}': {str(e)}")
+        sys.exit(1)
+
+def find_marketingList(company_name):
+    marketing_list_folder = "input/marketingLists"
+    for file_name in os.listdir(marketing_list_folder):
+        if file_name.endswith(".csv") and file_name[:-4] == company_name:
+            file_path = os.path.join(marketing_list_folder, file_name)
+            return file_path
+    return False
 
 if __name__ == "__main__":
     # Read clients' data from the specified CSV file
     clients = read_clients_data(INPUT_CLIENTS_DATA)
-
-    # Create a list of postcards that will be send to clients
-    postcards_list = list()
-    
     # Iterate over each client
     for client in clients:
-        # Check if the client's company name matches the specified CLIENT_NAME
-        if client.company_name == CLIENT_NAME:
+        if find_marketingList(client.company_name):
+            create_client_folder(client)
+            postcards_list = list()
             # Add the marketing list data to the client instance by reading the CSV file
-            client.add_marketing_list(read_marketing_list_csv(INPUT_MARKETING_LIST))
-
+            client.add_marketing_list(read_marketing_list_csv(find_marketingList(client.company_name)))
             # Retrieve and print the insights of the marketing list for the client
             if DEBUG_MODE:
                 client.get_insights_mkt_list()
@@ -655,13 +822,12 @@ if __name__ == "__main__":
             for property_data in client.marketing_list:
                 # Determine the template to use for each property data
                 postcard_name, postcard_number = get_template_for_property(property_data)
-                newPostcardTemplate = PostcardsList(postcard_name, postcard_number)
+                newPostcardTemplate = PostcardsList(property_data, postcard_name, postcard_number)
                 newPostcardTemplate.assign_company_information(client)
                 newPostcardTemplate.assign_owner_information(property_data) 
-                newPostcardTemplate.assign_colors()  
-                # if DEBUG_MODE:     
-                print(newPostcardTemplate)
+                newPostcardTemplate.assign_colors()
+                newPostcardTemplate.assign_credibility_logos()      
                 postcards_list.append(newPostcardTemplate) 
 
-    create_csv_file(postcards_list, OUTPUT_FILE_NAME)          
+            create_csv_file(postcards_list, client)          
                
