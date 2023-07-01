@@ -5,13 +5,11 @@ import random
 import os
 import sys
 
-INPUT_CLIENTS_DATA      = 'input/clientsData.csv'
-INPUT_COLORS_RULES      = 'input/colorsRule.csv'
-INPUT_MARKETING_LIST    = 'input/marketingList.csv'
-INPUT_POSTCARD_RULES    = 'input/postcardRules.csv'
-INPUT_CLIENTS_LOGOS     = 'input/clientsLogos.csv'
-INPUT_CLIENTS_ADDRESS   = 'input/clientAddress.csv'
-OUTPUT_FILE_NAME        = 'results.csv'
+INPUT_CLIENTS_DATA      = 'input/template_data - clients_data.csv'
+INPUT_COLORS_RULES      = 'input/template_data - color_rules.csv'
+INPUT_POSTCARD_RULES    = 'input/template_data - postcard_sequence.csv'
+INPUT_CLIENTS_LOGOS     = 'input/template_data - clients_logos.csv'
+INPUT_CLIENTS_ADDRESS   = 'input/template_data - clients_address.csv'
 DEBUG_MODE = False
 
 class PostcardsList:
@@ -56,10 +54,10 @@ class PostcardsList:
         self.google_street_view_url = google_street_view_url
         self.image_url = image_url
         self.qr_code_url = qr_code_url
-        self.credibility_logo_1_url = credibility_logo_1_url
-        self.credibility_logo_2_url = credibility_logo_2_url
-        self.credibility_logo_3_url = credibility_logo_3_url
-        self.credibility_logo_4_url = credibility_logo_4_url
+        self.cred_logo_1 = credibility_logo_1_url
+        self.cred_logo_2 = credibility_logo_2_url
+        self.cred_logo_3 = credibility_logo_3_url
+        self.cred_logo_4 = credibility_logo_4_url
         self.font_color_1 = font_color_1
         self.font_color_2 = font_color_2
         self.font_color_3 = font_color_3
@@ -94,28 +92,28 @@ class PostcardsList:
                f"Google Street View URL: {self.google_street_view_url}\n" \
                f"Image URL: {self.image_url}\n" \
                f"QR Code URL: {self.qr_code_url}\n" \
-               f"Credibility Logo 1 URL: {self.credibility_logo_1_url}\n" \
-               f"Credibility Logo 2 URL: {self.credibility_logo_2_url}\n" \
-               f"Credibility Logo 3 URL: {self.credibility_logo_3_url}\n" \
-               f"Credibility Logo 4 URL: {self.credibility_logo_4_url}\n" \
+               f"Credibility Logo 1 URL: {self.cred_logo_1}\n" \
+               f"Credibility Logo 2 URL: {self.cred_logo_2}\n" \
+               f"Credibility Logo 3 URL: {self.cred_logo_3}\n" \
+               f"Credibility Logo 4 URL: {self.cred_logo_4}\n" \
                f"Font Color 1: {self.font_color_1}\n" \
                f"Font Color 2: {self.font_color_2}\n" \
                f"Font Color 3: {self.font_color_3}\n" \
                f"Font Color 4: {self.font_color_4}\n" \
-               f"Block Color 1: {self.block_color_1}\n" \
-               f"Block Color 2: {self.block_color_2}\n" \
+               f"block_color_1: {self.block_color_1}\n" \
+               f"block_color_2: {self.block_color_2}\n" \
      
     def assign_colors(self):
         with open(INPUT_COLORS_RULES, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 if row['Company Name'] == self.company_name:
-                    self.font_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'Font Color 1' else self.font_color_1
-                    self.font_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'Font Color 2' else self.font_color_2
-                    self.font_color_3 = row["T"+self.postcard_number] if row['Variable'] == 'Font Color 3' else self.font_color_3
-                    self.font_color_4 = row["T"+self.postcard_number] if row['Variable'] == 'Font Color 4' else self.font_color_4
-                    self.block_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'Block Color 1' else self.block_color_1
-                    self.block_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'Block Color 2' else self.block_color_2
+                    self.font_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_1' else self.font_color_1
+                    self.font_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_2' else self.font_color_2
+                    self.font_color_3 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_3' else self.font_color_3
+                    self.font_color_4 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_4' else self.font_color_4
+                    self.block_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_1' else self.block_color_1
+                    self.block_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_2' else self.block_color_2
 
     def assign_company_information(self, client):
         self.company_name =             client.company_name
@@ -148,11 +146,14 @@ class PostcardsList:
         with open(INPUT_CLIENTS_LOGOS, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                if row['Company Name'] == self.company_name and row['Type'].startswith('Credibility Logo'):
-                    logo_number = str(row['Type'].replace("URL","").split()[-1])
-                    attribute_name = f"credibility_logo_{logo_number}_url"
+                if row['Company Name'] == self.company_name and row['Type'].startswith('cred_logo'):
+                    logo_number = str(row['Type'].replace("cred_logo_",""))
+                    attribute_name = f"cred_logo_{logo_number}"
                     setattr(self, attribute_name, row['Logo_url'])
 
+    def assign_tracking_number(self):
+        self.company_phone_number = client.tracking_numbers[int(self.postcard_number) - 1]
+    
 class PropertyData:
     def __init__(self, folio, owner_full_name, owner_first_name, owner_last_name, address, city, state, zip_code, county,
                  mailing_address, mailing_city, mailing_state, mailing_zip, golden_address, golden_city, golden_state,
@@ -379,10 +380,10 @@ def read_clients_data(file_name):
                 standardize_url(row['Company Website (seller facing)']),
                 standardize_url(row['Company Logo']),
                 [
-                    extract_tracking_number(row['Tracking Number 1']),
-                    extract_tracking_number(row['Tracking Number 2']),
-                    extract_tracking_number(row['Tracking Number 3']),
-                    extract_tracking_number(row['Tracking Number 4'])
+                    extract_tracking_number(row['Brand New Tracking Number 1']),
+                    extract_tracking_number(row['Brand New Tracking Number 2']),
+                    extract_tracking_number(row['Brand New Tracking Number 3']),
+                    extract_tracking_number(row['Brand New Tracking Number 4'])
                 ],
                 row['What is your current customer demographic?'],
                 row['How many postcards would you like to send?'],
@@ -465,7 +466,7 @@ def read_marketing_list_csv(file_name):
             thirty_sixty_days = row['30-60 DAYS']
             judgment = row['JUDGEMENT']
             debt_collection = row['DEBT COLLECTION']
-            num_dm = int(row['MARKETING DM COUNT'])
+            # num_dm = add_mkt_count(row['MARKETING DM COUNT'])
             main_distress_1 = row['MAIN DISTRESS #1']
             main_distress_2 = row['MAIN DISTRESS #2']
             main_distress_3 = row['MAIN DISTRESS #3']
@@ -476,7 +477,12 @@ def read_marketing_list_csv(file_name):
             targeted_message_4 = row['TARGETED MESSAGE #4']
             targeted_group_name = row['TARGETED GROUP NAME']
             targeted_group_message = row['TARGETED GROUP MESSAGE']
-
+            
+            try:
+                num_dm = int(row['MARKETING DM COUNT'])
+            except:
+                num_dm = 1
+        
             property_data = PropertyData(folio, owner_full_name, owner_first_name, owner_last_name, address, city,
                                          state, zip_code, county, mailing_address, mailing_city, mailing_state,
                                          mailing_zip, golden_address, golden_city, golden_state, golden_zip_code,
@@ -609,7 +615,8 @@ def generate_qr_code_url(url):
         "ecc": "L"
     }
     qr_code_url = base_url + "?" + "&".join(f"{key}={value}" for key, value in params.items())
-    return qr_code_url
+    # return qr_code_url
+    return url
 
 def create_csv_file(postcards_list, client):
     fieldnames = [
@@ -662,41 +669,48 @@ def create_csv_file(postcards_list, client):
         "MARKETING DM COUNT",
         "MAIN DISTRESS #1",
         "MAIN DISTRESS #2",
-        "MAIN DISTRESS #3",
+        "MAIN DISTRESS #3", 
         "MAIN DISTRESS #4",
-        "TARGETED MESSAGE #1",
-        "TARGETED MESSAGE #2",
-        "TARGETED MESSAGE #3",
-        "TARGETED MESSAGE #4",
+        "targeted_message_1",
+        "targeted_message_2",
+        "targeted_message_3",
+        "targeted_message_4",
         "TARGETED GROUP NAME",
-        "TARGETED GROUP MESSAGE",
+        "targeted_test", # Targeted group message
         "Postcard Name",
-        "Company Name",
-        "Company Phone Number",
+        "seller_full_name",
+        "seller_first_name",
+        "seller_mailing_add",
+        "company_name",
+        "company_phone_number", # Company phone number
+        "company_mailing_add",
         "Company Mailing Address",
         "Company Mailing City",
         "Company Mailing State",
         "Company Mailing ZIP",
-        "Company website",
-        "Testimonial Name",
-        "Investor Full Name",
-        "Company Logo URL",
-        "QR Code URL",
-        "Credibility Logo 1 URL",
-        "Credibility Logo 2 URL",
-        "Credibility Logo 3 URL",
-        "Credibility Logo 4 URL",
+        "company_website",
+        "test_name",
+        "investor_full_name",
+        "company_logo",
+        "qr_code",
+        "cred_logo_1",
+        "cred_logo_2",
+        "cred_logo_3",
+        "cred_logo_4",
         "font_color_1",
         "font_color_2",
         "font_color_3",
         "font_color_4",
-        "Block Color 1",
-        "Block Color 2"
-    ]    
+        "block_color_1",
+        "block_color_2",
+        "google_street-view",
+        "image"
+    ]            
     with open("output/" + client.company_name + "/MktList-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         for postcard in postcards_list:
+            seller_mailing_add =    postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             writer.writerow({
                 "FOLIO":                        postcard.property_data.folio,
                 "OWNER FULL NAME":              postcard.property_data.owner_full_name,
@@ -749,34 +763,40 @@ def create_csv_file(postcards_list, client):
                 "MAIN DISTRESS #2":             postcard.property_data.main_distress_2,
                 "MAIN DISTRESS #3":             postcard.property_data.main_distress_3,
                 "MAIN DISTRESS #4":             postcard.property_data.main_distress_4,
-                "TARGETED MESSAGE #1":          postcard.property_data.targeted_message_1,
-                "TARGETED MESSAGE #2":          postcard.property_data.targeted_message_2,
-                "TARGETED MESSAGE #3":          postcard.property_data.targeted_message_3,
-                "TARGETED MESSAGE #4":          postcard.property_data.targeted_message_4,
+                "targeted_message_1":          postcard.property_data.targeted_message_1,
+                "targeted_message_2":          postcard.property_data.targeted_message_2,
+                "targeted_message_3":          postcard.property_data.targeted_message_3,
+                "targeted_message_4":          postcard.property_data.targeted_message_4,
                 "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group,
-                "TARGETED GROUP MESSAGE":       postcard.property_data.targeted_testimonial,
+                "targeted_test":       postcard.property_data.targeted_testimonial,
                 "Postcard Name":                "T" + postcard.postcard_number,
-                "Company Name":                 postcard.company_name,
-                "Company Phone Number":         postcard.company_phone_number,
+                "seller_full_name":             postcard.property_data.owner_full_name,
+                "seller_first_name":            postcard.property_data.owner_first_name,
+                "seller_mailing_add":           seller_mailing_add,
+                "company_name":                 postcard.company_name,
+                "company_phone_number":         postcard.company_phone_number,
+                "company_mailing_add":          client.mailing_address,
                 "Company Mailing Address":      client.company_mailing_address,
                 "Company Mailing City":         client.company_mailing_city,
                 "Company Mailing State":        client.company_mailing_state,
                 "Company Mailing ZIP":          client.company_mailing_zip,
-                "Company website":              postcard.company_website,
-                "Testimonial Name":             postcard.testimonial_name,
-                "Investor Full Name":           postcard.investor_full_name,
-                "Company Logo URL":             postcard.company_logo_url,
-                "QR Code URL":                  postcard.qr_code_url,
-                "Credibility Logo 1 URL":       postcard.credibility_logo_1_url,
-                "Credibility Logo 2 URL":       postcard.credibility_logo_2_url,
-                "Credibility Logo 3 URL":       postcard.credibility_logo_3_url,
-                "Credibility Logo 4 URL":       postcard.credibility_logo_4_url,
+                "company_website":              postcard.company_website,
+                "test_name":             postcard.testimonial_name,
+                "investor_full_name":           postcard.investor_full_name,
+                "company_logo":                 postcard.company_logo_url,
+                "qr_code":                  postcard.qr_code_url,
+                "cred_logo_1":                  postcard.cred_logo_1,
+                "cred_logo_2":                  postcard.cred_logo_2,
+                "cred_logo_3":                  postcard.cred_logo_3,
+                "cred_logo_4":                 postcard.cred_logo_4,
                 "font_color_1":                 postcard.font_color_1,
                 "font_color_2":                 postcard.font_color_2,
                 "font_color_3":                 postcard.font_color_3,
                 "font_color_4":                 postcard.font_color_4,
-                "Block Color 1":                postcard.block_color_1,
-                "Block Color 2":                postcard.block_color_2
+                "block_color_1":                postcard.block_color_1,
+                "block_color_2":                postcard.block_color_2,
+                "google_street-view":           "",
+                "image":                        ""
             })
 
 def create_client_folder(client):
@@ -814,9 +834,11 @@ if __name__ == "__main__":
             client.add_marketing_list(read_marketing_list_csv(find_marketingList(client.company_name)))
             # Retrieve and print the insights of the marketing list for the client
             if DEBUG_MODE:
-                client.get_insights_mkt_list()
-
+                pass
+                # client.get_insights_mkt_list()
+    
             # Iterate over each property data in the client's marketing list
+            i = 0
             for property_data in client.marketing_list:
                 # Determine the template to use for each property data
                 postcard_name, postcard_number = get_template_for_property(property_data)
@@ -824,8 +846,12 @@ if __name__ == "__main__":
                 newPostcardTemplate.assign_company_information(client)
                 newPostcardTemplate.assign_owner_information(property_data) 
                 newPostcardTemplate.assign_colors()
-                newPostcardTemplate.assign_credibility_logos()      
+                newPostcardTemplate.assign_credibility_logos()   
+                newPostcardTemplate.assign_tracking_number()   
                 postcards_list.append(newPostcardTemplate) 
+                print("Progress: " + str(i) + "/" + str(len(client.marketing_list)))
+                i += 1
+                
 
             create_csv_file(postcards_list, client)          
                
