@@ -172,8 +172,8 @@ class PropertyData:
                  golden_zip_code, action_plans, property_status, score, distress_points, avatar, property_type,
                  link_properties, hidden_gems, tags, absentee, high_equity, downsizing, pre_foreclosure, vacant,
                  fifty_five_plus, estate, inter_family_transfer, divorce, taxes, probate, low_credit, code_violations,
-                 bankruptcy, liens, eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_sms, num_dm,
-                 num_cold_call, seller_avatar_group, targeted_testimonial, main_distress_1, main_distress_2,
+                 bankruptcy, liens, eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_dm,
+                 seller_avatar_group, targeted_testimonial, main_distress_1, main_distress_2,
                  main_distress_3, main_distress_4, targeted_message_1, targeted_message_2, targeted_message_3,
                  targeted_message_4):
         self.folio = folio
@@ -222,9 +222,9 @@ class PropertyData:
         self.judgment = judgment
         self.debt_collection = debt_collection
         self.total_value = total_value
-        self.num_sms = num_sms
+        # self.num_sms = num_sms
         self.num_dm = num_dm
-        self.num_cold_call = num_cold_call
+        # self.num_cold_call = num_cold_call
         self.seller_avatar_group = seller_avatar_group
         self.targeted_testimonial = targeted_testimonial
         self.main_distress_1 = main_distress_1
@@ -503,7 +503,7 @@ def read_marketing_list_csv(file_name):
                                          pre_foreclosure, vacant, fifty_five_plus, estate, inter_family_transfer,
                                          divorce, taxes, probate, low_credit, code_violations, bankruptcy, liens,
                                          eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_dm,
-                                         num_dm, num_dm, targeted_group_name, targeted_group_message,
+                                         targeted_group_name, targeted_group_message,
                                          main_distress_1, main_distress_2, main_distress_3, main_distress_4,
                                          targeted_message_1, targeted_message_2, targeted_message_3, targeted_message_4)
             marketing_list.append(property_data)
@@ -720,7 +720,7 @@ def create_csv_file(postcards_list, client):
         "image",
         "postcard_size" 
     ]            
-    with open("output/" + client.company_name + "/MktList-" +client.company_name + ".csv", "w", newline="") as file:
+    with open("results/" + client.company_name + "/MktList-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         for postcard in postcards_list:
@@ -877,7 +877,7 @@ def create_csv_file(postcards_list, client):
 
 def create_client_folder(client):
     folder_name = client.company_name
-    folder_path = os.path.join("output/", folder_name)
+    folder_path = os.path.join("results/", folder_name)
 
     try:
         # Comprueba si la carpeta ya existe
@@ -902,11 +902,10 @@ def checking_test_percentage(client):
     # generate a random number between 0 and 100
     random_number = random.randint(0, 100)
     # if the random number is less than the given percentage, return 0
-    if random_number < client.test_percentage:
-        return False
-    else:
-        # else return 1
+    if random_number <= client.test_percentage:
         return True
+    else:
+        return False
 
 if __name__ == "__main__":
     # Read clients' data from the specified CSV file
