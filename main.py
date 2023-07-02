@@ -12,7 +12,7 @@ INPUT_CLIENTS_LOGOS     = 'input/template_data - clients_logos.csv'
 INPUT_CLIENTS_ADDRESS   = 'input/template_data - clients_address.csv'
 INPUT_CLIENTS_PHONES    = 'input/template_data - clients_phones.csv'
 INPUT_CLIENTS_BG_IMG    = "input/template_data - clients_bg_img.csv"
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 class PostcardsList:
     def __init__(self, property_data, postcard_name=None, postcard_number=None,company_name=None, company_phone_number=None,
@@ -493,7 +493,7 @@ def read_marketing_list_csv(file_name):
             try:
                 num_dm = int(row['MARKETING DM COUNT'])
             except:
-                num_dm = 1
+                num_dm = 0
         
             property_data = PropertyData(folio, owner_full_name, owner_first_name, owner_last_name, address, city,
                                          state, zip_code, county, mailing_address, mailing_city, mailing_state,
@@ -549,12 +549,176 @@ def get_template_for_property(property_data):
             rule["Group Name"]                  == property_data.seller_avatar_group
             and str(rule["Sequence Step"])      == str(sequence_step)
         ):
-            if DEBUG_MODE:
-                print("Template : "     , rule["Template Number"],  "\t\tTemplate Name: ",  rule["Template Name"] )
-                print("Sequence Step: " , rule["Sequence Step"],    "\tGroup Name: ",       rule["Group Name"])
-                return str(rule["Template Name"]), str(rule["Template Number"])
-            else:
-                return str(rule["Template Name"]), str(rule["Template Number"])
+            #Tests
+            if (
+                rule["Group Name"] == "Owner Occupied" 
+                and str(rule["Sequence Step"])  == "1"
+                and str(rule["Template Number"]) != "4"
+                ):
+                print("\t\t\tError rule -> 1")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "55+ ( Senior )" 
+                and str(rule["Sequence Step"])  == "1"
+                and str(rule["Template Number"]) != "3"
+                ):
+                print("\t\t\tError rule -> 2")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Absentee" 
+                and str(rule["Sequence Step"])  == "1"
+                and str(rule["Template Number"]) != "2"
+                ):
+                print("\t\t\tError rule -> 3")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Financial" 
+                and str(rule["Sequence Step"])  == "1"
+                and str(rule["Template Number"]) != "4"
+                ):
+                print("\t\t\tError rule -> 4")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Probate/Estate" 
+                and str(rule["Sequence Step"])  == "1"
+                and str(rule["Template Number"]) != "3"
+                ):
+                print("\t\t\tError rule -> 5")
+                sys.exit(1)
+            
+            ###
+            
+            if (
+                rule["Group Name"] == "Owner Occupied" 
+                and str(rule["Sequence Step"])  == "2"
+                and str(rule["Template Number"]) != "2"
+                ):
+                print("\t\t\tError rule -> 6")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "55+ ( Senior )" 
+                and str(rule["Sequence Step"])  == "2"
+                and str(rule["Template Number"]) != "4"
+                ):
+                print("\t\t\tError rule -> 7")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Absentee" 
+                and str(rule["Sequence Step"])  == "2"
+                and str(rule["Template Number"]) != "3"
+                ):
+                print("\t\t\tError rule -> 8")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Financial" 
+                and str(rule["Sequence Step"])  == "2"
+                and str(rule["Template Number"]) != "1"
+                ):
+                print("\t\t\tError rule -> 9")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Probate/Estate" 
+                and str(rule["Sequence Step"])  == "2"
+                and str(rule["Template Number"]) != "4"
+                ):
+                print("\t\t\tError rule -> 10")
+                sys.exit(1)
+            
+            ###
+            
+            if (
+                rule["Group Name"] == "Owner Occupied" 
+                and str(rule["Sequence Step"])  == "3"
+                and str(rule["Template Number"]) != "3"
+                ):
+                print("\t\t\tError rule -> 11")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "55+ ( Senior )" 
+                and str(rule["Sequence Step"])  == "3"
+                and str(rule["Template Number"]) != "2"
+                ):
+                print("\t\t\tError rule -> 12")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Absentee" 
+                and str(rule["Sequence Step"])  == "3"
+                and str(rule["Template Number"]) != "1"
+                ):
+                print("\t\t\tError rule -> 13")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Financial" 
+                and str(rule["Sequence Step"])  == "3"
+                and str(rule["Template Number"]) != "2"
+                ):
+                print("\t\t\tError rule -> 14")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Probate/Estate" 
+                and str(rule["Sequence Step"])  == "3"
+                and str(rule["Template Number"]) != "2"
+                ):
+                print("\t\t\tError rule -> 15")
+                sys.exit(1)
+                
+        ###
+            
+            if (
+                rule["Group Name"] == "Owner Occupied" 
+                and str(rule["Sequence Step"])  == "4"
+                and str(rule["Template Number"]) != "1"
+                ):
+                print("\t\t\tError rule -> 16")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "55+ ( Senior )" 
+                and str(rule["Sequence Step"])  == "4"
+                and str(rule["Template Number"]) != "1"
+                ):
+                print("\t\t\tError rule -> 17")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Absentee" 
+                and str(rule["Sequence Step"])  == "4"
+                and str(rule["Template Number"]) != "4"
+                ):
+                print("\t\t\tError rule -> 18")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Financial" 
+                and str(rule["Sequence Step"])  == "4"
+                and str(rule["Template Number"]) != "3"
+                ):
+                print("\t\t\tError rule -> 19")
+                sys.exit(1)
+            
+            if (
+                rule["Group Name"] == "Probate/Estate" 
+                and str(rule["Sequence Step"])  == "4"
+                and str(rule["Template Number"]) != "1"
+                ):
+                print("\t\t\tError rule -> 20")
+                sys.exit(1)
+            
+   
+            
+            return str(rule["Template Name"]), str(rule["Template Number"])
     print("[ERROR] Template not found: ",)
     return None, None
 
