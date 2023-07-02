@@ -10,6 +10,8 @@ INPUT_COLORS_RULES      = 'input/template_data - color_rules.csv'
 INPUT_POSTCARD_RULES    = 'input/template_data - postcard_sequence.csv'
 INPUT_CLIENTS_LOGOS     = 'input/template_data - clients_logos.csv'
 INPUT_CLIENTS_ADDRESS   = 'input/template_data - clients_address.csv'
+INPUT_CLIENTS_PHONES    = 'input/template_data - clients_phones.csv'
+INPUT_CLIENTS_BG_IMG    = "input/template_data - clients_bg_img.csv"
 DEBUG_MODE = False
 
 class PostcardsList:
@@ -154,6 +156,13 @@ class PostcardsList:
     def assign_tracking_number(self):
         self.company_phone_number = client.tracking_numbers[int(self.postcard_number) - 1]
     
+    def assign_bg_image(self):
+        with open(INPUT_CLIENTS_BG_IMG, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['Company Name'] == self.company_name:
+                    self.bg_img = row['bg_img_T' + str(self.postcard_number)]
+    
 class PropertyData:
     def __init__(self, folio, owner_full_name, owner_first_name, owner_last_name, address, city, state, zip_code, county,
                  mailing_address, mailing_city, mailing_state, mailing_zip, golden_address, golden_city, golden_state,
@@ -239,7 +248,7 @@ class Client:
         self.postcard_quantity = postcard_quantity
         self.test_percentage = test_percentage
         self.drop_date = drop_date
-        self.postcard_size = postcard_size
+        self.postcard_size = postcard_size 
         self.featured_in_tv = featured_in_tv
         self.bbb_accreditation = bbb_accreditation
         self.years_in_business = years_in_business
@@ -704,7 +713,8 @@ def create_csv_file(postcards_list, client):
         "block_color_1",
         "block_color_2",
         "google_street-view",
-        "image"
+        "image",
+        "postcard_size" 
     ]            
     with open("output/" + client.company_name + "/MktList-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
@@ -763,12 +773,12 @@ def create_csv_file(postcards_list, client):
                 "MAIN DISTRESS #2":             postcard.property_data.main_distress_2,
                 "MAIN DISTRESS #3":             postcard.property_data.main_distress_3,
                 "MAIN DISTRESS #4":             postcard.property_data.main_distress_4,
-                "targeted_message_1":          postcard.property_data.targeted_message_1,
-                "targeted_message_2":          postcard.property_data.targeted_message_2,
-                "targeted_message_3":          postcard.property_data.targeted_message_3,
-                "targeted_message_4":          postcard.property_data.targeted_message_4,
+                "targeted_message_1":           postcard.property_data.targeted_message_1,
+                "targeted_message_2":           postcard.property_data.targeted_message_2,
+                "targeted_message_3":           postcard.property_data.targeted_message_3,
+                "targeted_message_4":           postcard.property_data.targeted_message_4,
                 "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group,
-                "targeted_test":       postcard.property_data.targeted_testimonial,
+                "targeted_test":                postcard.property_data.targeted_testimonial,
                 "Postcard Name":                "T" + postcard.postcard_number,
                 "seller_full_name":             postcard.property_data.owner_full_name,
                 "seller_first_name":            postcard.property_data.owner_first_name,
@@ -781,14 +791,14 @@ def create_csv_file(postcards_list, client):
                 "Company Mailing State":        client.company_mailing_state,
                 "Company Mailing ZIP":          client.company_mailing_zip,
                 "company_website":              postcard.company_website,
-                "test_name":             postcard.testimonial_name,
+                "test_name":                    postcard.testimonial_name,
                 "investor_full_name":           postcard.investor_full_name,
                 "company_logo":                 postcard.company_logo_url,
-                "qr_code":                  postcard.qr_code_url,
+                "qr_code":                      postcard.qr_code_url,
                 "cred_logo_1":                  postcard.cred_logo_1,
                 "cred_logo_2":                  postcard.cred_logo_2,
                 "cred_logo_3":                  postcard.cred_logo_3,
-                "cred_logo_4":                 postcard.cred_logo_4,
+                "cred_logo_4":                  postcard.cred_logo_4,
                 "font_color_1":                 postcard.font_color_1,
                 "font_color_2":                 postcard.font_color_2,
                 "font_color_3":                 postcard.font_color_3,
@@ -796,7 +806,8 @@ def create_csv_file(postcards_list, client):
                 "block_color_1":                postcard.block_color_1,
                 "block_color_2":                postcard.block_color_2,
                 "google_street-view":           "",
-                "image":                        ""
+                "image":                        postcard.bg_img,
+                "postcard_size":                client.postcard_size
             })
 
 def create_client_folder(client):
@@ -827,6 +838,7 @@ if __name__ == "__main__":
     clients = read_clients_data(INPUT_CLIENTS_DATA)
     # Iterate over each client
     for client in clients:
+        print("Client:\t", client.company_name)
         if find_marketingList(client.company_name):
             create_client_folder(client)
             postcards_list = list()
@@ -848,10 +860,10 @@ if __name__ == "__main__":
                 newPostcardTemplate.assign_colors()
                 newPostcardTemplate.assign_credibility_logos()   
                 newPostcardTemplate.assign_tracking_number()   
+                newPostcardTemplate.assign_bg_image()
                 postcards_list.append(newPostcardTemplate) 
-                print("Progress: " + str(i) + "/" + str(len(client.marketing_list)))
-                i += 1
-                
-
-            create_csv_file(postcards_list, client)          
+            create_csv_file(postcards_list, client)   
+        print("\t\tCompleted\n")         
                
+# Falta agregar una funcion que tome el test_percentage de un cliente
+# y asigne la propiedad a un postcard con nuestro template o no, y cree otro archivo.
