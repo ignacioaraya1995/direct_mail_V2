@@ -1,37 +1,61 @@
 Company Name,Variable,T1,T2,T3,T4
 Atlas Property investors,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
 Atlas Property investors,font_color_2,#3FC3FF,#3FC3FF,#3FC3FF,#3FC3FF
-Atlas Property investors,font_color_3,,#081330,#2C78E4,#E6F4FF
-Atlas Property investors,font_color_4,,,,#081330
-Atlas Property investors,block_color_1,#081330,#081330,#081330,#081330
-Atlas Property investors,block_color_2,#0F2B76,#E6F4FF,,
+Atlas Property investors,font_color_3,#081330,#081330,#081330,#E6F4FF
+Atlas Property investors,font_color_4,,#F4C300,#2C78E4,
+Atlas Property investors,block_color_1,#222B47,#222B47,#222B47,#222B47
+Atlas Property investors,block_color_2,#324582,#E6F4FF,#3FC3FF,
 Win Win Property Buyer,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
-Win Win Property Buyer,font_color_2,#3FC3FF,#3FC3FF,#3FC3FF,#3FC3FF
-Win Win Property Buyer,font_color_3,,#081330,#2C78E4,#E6F4FF
-Win Win Property Buyer,font_color_4,,,,#081330
-Win Win Property Buyer,block_color_1,#081330,#081330,#081330,#081330
-Win Win Property Buyer,block_color_2,#0F2B76,#E6F4FF,,
+Win Win Property Buyer,font_color_2,#FCC54E,#FCC54E,#FCC54E,#FCC54E
+Win Win Property Buyer,font_color_3,#081330,#081330,#081330,#E6F4FF
+Win Win Property Buyer,font_color_4,,#F4C300,#2C78E4,
+Win Win Property Buyer,block_color_1,#1C4894,#1C4894,#1C4894,#1C4894
+Win Win Property Buyer,block_color_2,#003289,#E6F4FF,#FCC54E,
 Easy Sell Property Solutions,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
-Easy Sell Property Solutions,font_color_2,#3FC3FF,#3FC3FF,#3FC3FF,#3FC3FF
-Easy Sell Property Solutions,font_color_3,,#081330,#2C78E4,#E6F4FF
-Easy Sell Property Solutions,font_color_4,,,,#081330
-Easy Sell Property Solutions,block_color_1,#081330,#081330,#081330,#081330
-Easy Sell Property Solutions,block_color_2,#0F2B76,#E6F4FF,,
+Easy Sell Property Solutions,font_color_2,#FDDC01,#FDDC01,#FDDC01,#FDDC01
+Easy Sell Property Solutions,font_color_3,#081330,#081330,#081330,#E6F4FF
+Easy Sell Property Solutions,font_color_4,,#F4C300,#2C78E4,
+Easy Sell Property Solutions,block_color_1,#114680,#114680,#114680,#114680
+Easy Sell Property Solutions,block_color_2,#113862,#E6F4FF,#FDDC01,
 Cava Companies,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
 Cava Companies,font_color_2,#84C550,#84C550,#84C550,#84C550
-Cava Companies,font_color_3,#081330,#081330,#081330,#081330
-Cava Companies,font_color_4,#F4C300,#F4C300,#F4C300,#F4C300
+Cava Companies,font_color_3,#081330,#081330,#081330,#E6F4FF
+Cava Companies,font_color_4,,#F4C300,#2C78E4,
 Cava Companies,block_color_1,#0F3B59,#0F3B59,#0F3B59,#0F3B59
-Cava Companies,block_color_2,#1576B1,#E6F4FF,#84C550,#1576B1
+Cava Companies,block_color_2,#1576B1,#E6F4FF,#84C550,
 Sell Now Wisconsin,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
-Sell Now Wisconsin,font_color_2,#3FC3FF,#3FC3FF,#3FC3FF,#3FC3FF
-Sell Now Wisconsin,font_color_3,,#081330,#2C78E4,#E6F4FF
-Sell Now Wisconsin,font_color_4,,,,#081330
-Sell Now Wisconsin,block_color_1,#081330,#081330,#081330,#081330
-Sell Now Wisconsin,block_color_2,#0F2B76,#E6F4FF,,
+Sell Now Wisconsin,font_color_2,#F9A61A,#F9A61A,#F9A61A,#F9A61A
+Sell Now Wisconsin,font_color_3,#081330,#081330,#081330,#E6F4FF
+Sell Now Wisconsin,font_color_4,,#F4C300,#2C78E4,
+Sell Now Wisconsin,block_color_1,#002244,#002244,#002244,#002244
+Sell Now Wisconsin,block_color_2,#003870,#E6F4FF,#F9A61A,
 LVN Real Estate,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
-LVN Real Estate,font_color_2,#3FC3FF,#3FC3FF,#3FC3FF,#3FC3FF
-LVN Real Estate,font_color_3,,#081330,#2C78E4,#E6F4FF
-LVN Real Estate,font_color_4,,,,#081330
-LVN Real Estate,block_color_1,#081330,#081330,#081330,#081330
-LVN Real Estate,block_color_2,#0F2B76,#E6F4FF,,
+LVN Real Estate,font_color_2,#F4C300,#F4C300,#F4C300,#F4C300
+LVN Real Estate,font_color_3,#081330,#081330,#081330,#E6F4FF
+LVN Real Estate,font_color_4,,#F4C300,#2C78E4,
+LVN Real Estate,block_color_1,#2D924A,#2D924A,#2D924A,#2D924A
+LVN Real Estate,block_color_2,#1C592D,#E6F4FF,#F4C300,
+"Jax Freedom Home Buyers, LLC",font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+"Jax Freedom Home Buyers, LLC",font_color_2,#BB2C30,#BB2C30,#BB2C30,#BB2C30
+"Jax Freedom Home Buyers, LLC",font_color_3,#081330,#081330,#081330,#E6F4FF
+"Jax Freedom Home Buyers, LLC",font_color_4,,#F4C300,#2C78E4,
+"Jax Freedom Home Buyers, LLC",block_color_1,#23254D,#23254D,#23254D,#23254D
+"Jax Freedom Home Buyers, LLC",block_color_2,#333672,#E6F4FF,#BB2C30,
+TN HomeBuyers,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+TN HomeBuyers,font_color_2,#F00F10,#F00F10,#F00F10,#F00F10
+TN HomeBuyers,font_color_3,#081330,#081330,#081330,#E6F4FF
+TN HomeBuyers,font_color_4,,#F4C300,#2C78E4,
+TN HomeBuyers,block_color_1,#032090,#032090,#032090,#032090
+TN HomeBuyers,block_color_2,#152F92,#E6F4FF,#F00F10,
+BBPOCO,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+BBPOCO,font_color_2,#FFAE42,#FFAE42,#FFAE42,#FFAE42
+BBPOCO,font_color_3,#081330,#081330,#081330,#E6F4FF
+BBPOCO,font_color_4,,#F4C300,#2C78E4,
+BBPOCO,block_color_1,#036637,#036637,#036637,#036637
+BBPOCO,block_color_2,#28724F,#E6F4FF,#FFAE42,
+BBPOFL,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+BBPOFL,font_color_2,#EF801B,#EF801B,#EF801B,#EF801B
+BBPOFL,font_color_3,#081330,#081330,#081330,#E6F4FF
+BBPOFL,font_color_4,,#F4C300,#2C78E4,
+BBPOFL,block_color_1,#30A5B6,#30A5B6,#30A5B6,#30A5B6
+BBPOFL,block_color_2,#57A7B3,#E6F4FF,#EF801B,

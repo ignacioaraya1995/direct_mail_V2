@@ -1,8 +1,57 @@
 [
     {
+        "Group Number": "4",
+        "Group Name": "55+ ( Senior )",
+        "Sequence Step": "1",
+        "Template Number": "3",
+        "Template Name": "Amiable"
+    },
+    {
         "Group Number": "1",
         "Group Name": "Probate/Estate",
+        "Sequence Step": "2",
+        "Template Number": "4",
+        "Template Name": "Expressive"
+    },
+    {
+        "Group Number": "1",
+        "Group Name": "Probate/Estate",
+        "Sequence Step": "3",
+        "Template Number": "2",
+        "Template Name": "Analytical"
+    },
+    {
+        "Group Number": "1",
+        "Group Name": "Probate/Estate",
+        "Sequence Step": "4",
+        "Template Number": "1",
+        "Template Name": "Driver"
+    },
+    {
+        "Group Number": "3",
+        "Group Name": "Absentee",
         "Sequence Step": "1",
+        "Template Number": "2",
+        "Template Name": "Analytical"
+    },
+    {
+        "Group Number": "2",
+        "Group Name": "Financial",
+        "Sequence Step": "2",
+        "Template Number": "1",
+        "Template Name": "Driver"
+    },
+    {
+        "Group Number": "2",
+        "Group Name": "Financial",
+        "Sequence Step": "3",
+        "Template Number": "2",
+        "Template Name": "Analytical"
+    },
+    {
+        "Group Number": "2",
+        "Group Name": "Financial",
+        "Sequence Step": "4",
         "Template Number": "3",
         "Template Name": "Amiable"
     },
@@ -16,16 +65,23 @@
     {
         "Group Number": "3",
         "Group Name": "Absentee",
-        "Sequence Step": "1",
-        "Template Number": "2",
-        "Template Name": "Analytical"
-    },
-    {
-        "Group Number": "4",
-        "Group Name": "55+ ( Senior )",
-        "Sequence Step": "1",
+        "Sequence Step": "2",
         "Template Number": "3",
         "Template Name": "Amiable"
+    },
+    {
+        "Group Number": "3",
+        "Group Name": "Absentee",
+        "Sequence Step": "3",
+        "Template Number": "1",
+        "Template Name": "Driver"
+    },
+    {
+        "Group Number": "3",
+        "Group Name": "Absentee",
+        "Sequence Step": "4",
+        "Template Number": "4",
+        "Template Name": "Expressive"
     },
     {
         "Group Number": "5",
@@ -35,32 +91,32 @@
         "Template Name": "Expressive"
     },
     {
-        "Group Number": "1",
-        "Group Name": "Probate/Estate",
-        "Sequence Step": "2",
-        "Template Number": "4",
-        "Template Name": "Expressive"
-    },
-    {
-        "Group Number": "2",
-        "Group Name": "Financial",
-        "Sequence Step": "2",
-        "Template Number": "1",
-        "Template Name": "Driver"
-    },
-    {
-        "Group Number": "3",
-        "Group Name": "Absentee",
-        "Sequence Step": "2",
-        "Template Number": "3",
-        "Template Name": "Amiable"
-    },
-    {
         "Group Number": "4",
         "Group Name": "55+ ( Senior )",
         "Sequence Step": "2",
         "Template Number": "4",
         "Template Name": "Expressive"
+    },
+    {
+        "Group Number": "4",
+        "Group Name": "55+ ( Senior )",
+        "Sequence Step": "3",
+        "Template Number": "2",
+        "Template Name": "Analytical"
+    },
+    {
+        "Group Number": "4",
+        "Group Name": "55+ ( Senior )",
+        "Sequence Step": "4",
+        "Template Number": "1",
+        "Template Name": "Driver"
+    },
+    {
+        "Group Number": "1",
+        "Group Name": "Probate/Estate",
+        "Sequence Step": "1",
+        "Template Number": "3",
+        "Template Name": "Amiable"
     },
     {
         "Group Number": "5",
@@ -70,67 +126,11 @@
         "Template Name": "Analytical"
     },
     {
-        "Group Number": "1",
-        "Group Name": "Probate/Estate",
-        "Sequence Step": "3",
-        "Template Number": "2",
-        "Template Name": "Analytical"
-    },
-    {
-        "Group Number": "2",
-        "Group Name": "Financial",
-        "Sequence Step": "3",
-        "Template Number": "2",
-        "Template Name": "Analytical"
-    },
-    {
-        "Group Number": "3",
-        "Group Name": "Absentee",
-        "Sequence Step": "3",
-        "Template Number": "1",
-        "Template Name": "Driver"
-    },
-    {
-        "Group Number": "4",
-        "Group Name": "55+ ( Senior )",
-        "Sequence Step": "3",
-        "Template Number": "2",
-        "Template Name": "Analytical"
-    },
-    {
         "Group Number": "5",
         "Group Name": "Owner Occupied",
         "Sequence Step": "3",
         "Template Number": "3",
         "Template Name": "Amiable"
-    },
-    {
-        "Group Number": "1",
-        "Group Name": "Probate/Estate",
-        "Sequence Step": "4",
-        "Template Number": "1",
-        "Template Name": "Driver"
-    },
-    {
-        "Group Number": "2",
-        "Group Name": "Financial",
-        "Sequence Step": "4",
-        "Template Number": "3",
-        "Template Name": "Amiable"
-    },
-    {
-        "Group Number": "3",
-        "Group Name": "Absentee",
-        "Sequence Step": "4",
-        "Template Number": "4",
-        "Template Name": "Expressive"
-    },
-    {
-        "Group Number": "4",
-        "Group Name": "55+ ( Senior )",
-        "Sequence Step": "4",
-        "Template Number": "1",
-        "Template Name": "Driver"
     },
     {
         "Group Number": "5",

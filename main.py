@@ -4,6 +4,7 @@ import json
 import random
 import os
 import sys
+import pandas as pd
 
 INPUT_CLIENTS_DATA      = 'input/template_data - clients_data.csv'
 INPUT_COLORS_RULES      = 'input/template_data - color_rules.csv'
@@ -15,18 +16,45 @@ INPUT_CLIENTS_BG_IMG    = "input/template_data - clients_bg_img.csv"
 DEBUG_MODE = True
 
 class PostcardsList:
-    def __init__(self, property_data, postcard_name=None, postcard_number=None,company_name=None, company_phone_number=None,
-                 company_mailing_address=None, company_mailing_city=None, company_mailing_state=None,
-                 company_mailing_zip=None, company_website=None, testimonial_name=None,
-                 investor_full_name=None, targeted_message_1=None, targeted_message_2=None,
-                 targeted_message_3=None, targeted_testimonial=None, owner_full_name=None,
-                 owner_first_name=None, owner_property_address=None, owner_mailing_address=None,
-                 owner_mailing_city=None, owner_mailing_state=None, owner_mailing_zip=None,
-                 total_value=None, company_logo_url=None, google_street_view_url=None,
-                 image_url=None, qr_code_url=None, credibility_logo_1_url=None,
-                 credibility_logo_2_url=None, credibility_logo_3_url=None, credibility_logo_4_url=None, 
-                 font_color_1 = None, font_color_2 = None, font_color_3 = None, font_color_4 = None, 
-                 block_color_1 = None, block_color_2 = None
+    def __init__(self, 
+                 property_data, 
+                 postcard_name=None, 
+                 postcard_number=None,
+                 company_name=None, 
+                 company_phone_number=None,
+                 company_mailing_address=None, 
+                 company_mailing_city=None, 
+                 company_mailing_state=None,
+                 company_mailing_zip=None, 
+                 company_website=None, 
+                 testimonial_name=None,
+                 investor_full_name=None, 
+                 targeted_message_1=None, 
+                 targeted_message_2=None,
+                 targeted_message_3=None, 
+                 targeted_testimonial=None, 
+                 owner_full_name=None,
+                 owner_first_name=None, 
+                 owner_property_address=None, 
+                 owner_mailing_address=None,
+                 owner_mailing_city=None, 
+                 owner_mailing_state=None, 
+                 owner_mailing_zip=None,
+                 total_value=None, 
+                 company_logo_url=None, 
+                 google_street_view_url=None,
+                 image_url=None, 
+                 qr_code_url=None, 
+                 credibility_logo_1_url=None,
+                 credibility_logo_2_url=None, 
+                 credibility_logo_3_url=None, 
+                 credibility_logo_4_url=None, 
+                 font_color_1 = None, 
+                 font_color_2 = None, 
+                 font_color_3 = None, 
+                 font_color_4 = None, 
+                 block_color_1 = None, 
+                 block_color_2 = None
                  ):
         self.property_data = property_data
         self.postcard_name = postcard_name
@@ -77,6 +105,7 @@ class PostcardsList:
                f"Company Mailing ZIP: {self.company_mailing_zip}\n" \
                f"Company Website: {self.company_website}\n" \
                f"Testimonial Name: {self.testimonial_name}\n" \
+               f"Seller Avatar Group: {self.property_data.seller_avatar_group}\n" \
                f"Investor Full Name: {self.investor_full_name}\n" \
                f"Targeted Message 1: {self.targeted_message_1}\n" \
                f"Targeted Message 2: {self.targeted_message_2}\n" \
@@ -105,7 +134,7 @@ class PostcardsList:
                f"block_color_1: {self.block_color_1}\n" \
                f"block_color_2: {self.block_color_2}\n" \
      
-    def assign_colors(self):
+    def assign_colors(self, client):
         """
         The function assigns colors to different variables based on the company name and postcard number.
         """
@@ -129,11 +158,10 @@ class PostcardsList:
         self.company_mailing_zip =      ""
         self.company_website =          client.website
         self.investor_full_name =       client.agent_name
-        self.company_logo_url =         client.logo
         self.testimonial_name =         generate_full_name()
-        self.qr_code_url =              generate_qr_code_url(client.website)
+        self.qr_code_url =              generate_qr_code_url(client.website_link)
 
-    def assign_owner_information(self, propertyData):
+    def assign_owner_information(self, propertyData, client):
         self.targeted_message_1 =       propertyData.targeted_message_1
         self.targeted_message_2 =       propertyData.targeted_message_2
         self.targeted_message_3 =       propertyData.targeted_message_3
@@ -147,24 +175,38 @@ class PostcardsList:
         self.owner_mailing_zip =        propertyData.mailing_zip
         self.total_value =              add_thousands_separator(propertyData.total_value)
 
-    def assign_credibility_logos(self):
+    def assign_logos(self, client):
         with open(INPUT_CLIENTS_LOGOS, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 if row['Company Name'] == self.company_name and row['Type'].startswith('cred_logo'):
                     logo_number = str(row['Type'].replace("cred_logo_",""))
                     attribute_name = f"cred_logo_{logo_number}"
-                    setattr(self, attribute_name, row['Logo_url'])
+                    setattr(self, attribute_name, row['Logo_url_T' + self.postcard_number])
+                if row['Company Name'] == self.company_name and row['Type'] == 'Company':
+                    company_logo = row['Logo_url_T' + str(self.postcard_number)]
+                    self.company_logo_url = company_logo
 
-    def assign_tracking_number(self):
+    def assign_tracking_number(self, client):
         self.company_phone_number = client.tracking_numbers[int(self.postcard_number) - 1]
     
-    def assign_bg_image(self):
+    def assign_bg_image(self, client):
         with open(INPUT_CLIENTS_BG_IMG, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                if row['Company Name'] == self.company_name:
-                    self.bg_img = row['bg_img_T' + str(self.postcard_number)]
+                if row['Company Name'] == self.company_name and str(row["Template Number"]) == str(self.postcard_number):
+                    self.bg_img = row[self.property_data.seller_avatar_group]
+                    return True
+            print("Could not find a matching background for this postcard number\n\n")
+            print(self)
+            sys.exit(1)
+            return False
+    
+    def assign_google_street_view(self):
+        if str(self.postcard_number) == "1":
+            self.google_street_view_url = True
+        else:
+            self.google_street_view_url = False
     
 class PropertyData:
     def __init__(self, folio, owner_full_name, owner_first_name, owner_last_name, address, city, state, zip_code, county,
@@ -245,7 +287,6 @@ class Client:
         self.contact_phone = contact_phone
         self.mailing_address = mailing_address
         self.website = website
-        self.logo = self.lookup_company_logo_url()
         self.tracking_numbers = tracking_numbers
         self.demographic = demographic
         self.postcard_quantity = postcard_quantity
@@ -342,14 +383,6 @@ class Client:
 
         print("=== End of Insights ===")
 
-    def lookup_company_logo_url(self):
-        with open(INPUT_CLIENTS_LOGOS, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row['Company Name'] == self.company_name and row['Type'] == "Company":
-                    return row['Logo_url']
-        return ""
-    
     def get_client_address(self):
         with open(INPUT_CLIENTS_ADDRESS, 'r') as file:
             reader = csv.DictReader(file)
@@ -520,9 +553,8 @@ def standardize_url(url):
     """
     Standardizes a URL to the format https://website.com.
     """
-    # Remove leading/trailing whitespaces
+    # Remove leading/trailing whitespaces    
     url = url.strip()
-
     # Check if the URL starts with 'http://' or 'www.'
     if url.startswith("http://"):
         url = url.replace("http://", "https://")
@@ -531,8 +563,7 @@ def standardize_url(url):
 
     # Add 'https://' if it's missing
     if not url.startswith("https://"):
-        url = "https://" + url
-
+        url = "https://" + url    
     return url
 
 def load_postcard_rules(fileName):
@@ -543,6 +574,7 @@ def load_postcard_rules(fileName):
 def get_template_for_property(property_data):
     # load_sequence_step
     sequence_step = (property_data.num_dm % 4) + 1
+    property_data.sequence_step = str(sequence_step)
     rules_data = load_postcard_rules(csv_to_json(INPUT_POSTCARD_RULES))
     for rule in rules_data:
         if (
@@ -794,7 +826,7 @@ def generate_qr_code_url(url):
     # return qr_code_url
     return url
 
-def create_csv_file(postcards_list, client):
+def create_csv_files(postcards_list, client):
     fieldnames = [
         "DM CASE STUDY",
         "FOLIO",
@@ -844,6 +876,7 @@ def create_csv_file(postcards_list, client):
         "JUDGEMENT",
         "DEBT COLLECTION",
         "MARKETING DM COUNT",
+        "sequence_step",
         "MAIN DISTRESS #1",
         "MAIN DISTRESS #2",
         "MAIN DISTRESS #3", 
@@ -861,7 +894,7 @@ def create_csv_file(postcards_list, client):
         "company_name",
         "company_phone_number", # Company phone number
         "company_mailing_add",
-        "Company Mailing Address",
+        # "Company Mailing Address",
         "Company Mailing City",
         "Company Mailing State",
         "Company Mailing ZIP",
@@ -869,7 +902,7 @@ def create_csv_file(postcards_list, client):
         "test_name",
         "investor_full_name",
         "company_logo",
-        "qr_code",
+        "qr_code_url",
         "cred_logo_1",
         "cred_logo_2",
         "cred_logo_3",
@@ -880,15 +913,17 @@ def create_csv_file(postcards_list, client):
         "font_color_4",
         "block_color_1",
         "block_color_2",
-        "google_street-view",
+        "google_street_view",
         "image",
         "postcard_size" 
     ]            
-    with open("results/" + client.company_name + "/MktList-" +client.company_name + ".csv", "w", newline="") as file:
+    with open("results/" + client.company_name + "/FULL-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
         for postcard in postcards_list:
-            seller_mailing_add =    postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
+            seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
+            company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
+            
             if checking_test_percentage(client):   
                 writer.writerow({
                     "DM CASE STUDY":                True,
@@ -939,6 +974,7 @@ def create_csv_file(postcards_list, client):
                     "JUDGEMENT":                    postcard.property_data.judgment,
                     "DEBT COLLECTION":              postcard.property_data.debt_collection,
                     "MARKETING DM COUNT":           postcard.property_data.num_dm,
+                    "sequence_step":                postcard.property_data.sequence_step,
                     "MAIN DISTRESS #1":             postcard.property_data.main_distress_1,
                     "MAIN DISTRESS #2":             postcard.property_data.main_distress_2,
                     "MAIN DISTRESS #3":             postcard.property_data.main_distress_3,
@@ -955,8 +991,8 @@ def create_csv_file(postcards_list, client):
                     "seller_mailing_add":           seller_mailing_add,
                     "company_name":                 postcard.company_name,
                     "company_phone_number":         postcard.company_phone_number,
-                    "company_mailing_add":          client.mailing_address,
-                    "Company Mailing Address":      client.company_mailing_address,
+                    "company_mailing_add":          company_mailing_add,
+                    # "Company Mailing Address":      client.mailing_address, 
                     "Company Mailing City":         client.company_mailing_city,
                     "Company Mailing State":        client.company_mailing_state,
                     "Company Mailing ZIP":          client.company_mailing_zip,
@@ -964,7 +1000,7 @@ def create_csv_file(postcards_list, client):
                     "test_name":                    postcard.testimonial_name,
                     "investor_full_name":           postcard.investor_full_name,
                     "company_logo":                 postcard.company_logo_url,
-                    "qr_code":                      postcard.qr_code_url,
+                    "qr_code_url":                  postcard.qr_code_url,
                     "cred_logo_1":                  postcard.cred_logo_1,
                     "cred_logo_2":                  postcard.cred_logo_2,
                     "cred_logo_3":                  postcard.cred_logo_3,
@@ -975,7 +1011,7 @@ def create_csv_file(postcards_list, client):
                     "font_color_4":                 postcard.font_color_4,
                     "block_color_1":                postcard.block_color_1,
                     "block_color_2":                postcard.block_color_2,
-                    "google_street-view":           "",
+                    "google_street_view":           postcard.google_street_view_url,
                     "image":                        postcard.bg_img,
                     "postcard_size":                client.postcard_size
                 })
@@ -1029,6 +1065,7 @@ def create_csv_file(postcards_list, client):
                     "JUDGEMENT":                    postcard.property_data.judgment,
                     "DEBT COLLECTION":              postcard.property_data.debt_collection,
                     "MARKETING DM COUNT":           postcard.property_data.num_dm,
+                    "sequence_step":                postcard.property_data.sequence_step,
                     "MAIN DISTRESS #1":             postcard.property_data.main_distress_1,
                     "MAIN DISTRESS #2":             postcard.property_data.main_distress_2,
                     "MAIN DISTRESS #3":             postcard.property_data.main_distress_3,
@@ -1038,6 +1075,16 @@ def create_csv_file(postcards_list, client):
                     "targeted_message_3":           postcard.property_data.targeted_message_3,
                     "targeted_message_4":           postcard.property_data.targeted_message_4,
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group                })
+
+    if client.test_percentage != 100:
+        df = pd.read_csv("results/" + client.company_name + "/FULL-" +client.company_name + ".csv")
+            # Create two dataframes based on the "DM CASE STUDY" field
+        df_true = df[df['DM CASE STUDY'] == True]
+        df_false = df[df['DM CASE STUDY'] == False]
+        
+        # Save the dataframes to new csv files
+        df_true.to_csv("results/" + client.company_name + "/CaseStudy-" +client.company_name + ".csv", index=False)
+        df_false.to_csv("results/" + client.company_name + "/NoCaseStudy-" +client.company_name + ".csv", index=False)
 
 def create_client_folder(client):
     folder_name = client.company_name
@@ -1095,13 +1142,14 @@ if __name__ == "__main__":
                 postcard_name, postcard_number = get_template_for_property(property_data)
                 newPostcardTemplate = PostcardsList(property_data, postcard_name, postcard_number)
                 newPostcardTemplate.assign_company_information(client)
-                newPostcardTemplate.assign_owner_information(property_data) 
-                newPostcardTemplate.assign_colors()
-                newPostcardTemplate.assign_credibility_logos()   
-                newPostcardTemplate.assign_tracking_number()   
-                newPostcardTemplate.assign_bg_image()
+                newPostcardTemplate.assign_owner_information(property_data, client) 
+                newPostcardTemplate.assign_colors(client)
+                newPostcardTemplate.assign_logos(client)   
+                newPostcardTemplate.assign_tracking_number(client)   
+                newPostcardTemplate.assign_bg_image(client)
+                newPostcardTemplate.assign_google_street_view()
                 postcards_list.append(newPostcardTemplate) 
-            create_csv_file(postcards_list, client)   
+            create_csv_files(postcards_list, client)   
         print("\t\tCompleted\n")         
                
 # Falta agregar una funcion que tome el test_percentage de un cliente
