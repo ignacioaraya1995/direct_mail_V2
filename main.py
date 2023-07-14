@@ -20,6 +20,7 @@ class PostcardsList:
                  property_data, 
                  postcard_name=None, 
                  postcard_number=None,
+                 postcard_gender=None,
                  company_name=None, 
                  company_phone_number=None,
                  company_mailing_address=None, 
@@ -59,6 +60,7 @@ class PostcardsList:
         self.property_data = property_data
         self.postcard_name = postcard_name
         self.postcard_number = postcard_number
+        self.postcard_gender = postcard_gender
         self.company_name = company_name
         self.company_phone_number = company_phone_number
         self.company_mailing_address = company_mailing_address
@@ -158,7 +160,7 @@ class PostcardsList:
         self.company_mailing_zip =      ""
         self.company_website =          client.website
         self.investor_full_name =       client.agent_name
-        self.testimonial_name =         generate_full_name()
+        self.testimonial_name =         generate_full_name(self.postcard_gender)
         self.qr_code_url =              generate_qr_code_url(client.website_link)
 
     def assign_owner_information(self, propertyData, client):
@@ -747,10 +749,8 @@ def get_template_for_property(property_data):
                 ):
                 print("\t\t\tError rule -> 20")
                 sys.exit(1)
-            
-   
-            
-            return str(rule["Template Name"]), str(rule["Template Number"])
+                        
+            return str(rule["Template Name"]), str(rule["Template Number"]), rule["Postcard Gender"]
     print("[ERROR] Template not found: ",)
     return None, None
 
@@ -769,8 +769,9 @@ def csv_to_json(csv_file):
     
     return "workingFiles/"+csv_file.replace(".csv", ".json").replace("input/", "")
 
-def generate_full_name():
+def generate_full_name(postcard_gender):
     # List of common American male first names
+        
     male_first_names = [
         "James", "John", "Robert", "Michael", "William", "David", "Joseph", "Charles",
         "Thomas", "Daniel", "Matthew", "Anthony", "Donald", "Mark", "Paul", "Steven",
@@ -803,8 +804,7 @@ def generate_full_name():
     ]
 
     # Generate a random first name based on gender
-    gender = random.choice(["male", "female"])
-    if gender == "male":
+    if postcard_gender == "Male":
         first_name = random.choice(male_first_names)
     else:
         first_name = random.choice(female_first_names)
@@ -891,6 +891,7 @@ def create_csv_files(postcards_list, client):
         "seller_full_name",
         "seller_first_name",
         "seller_mailing_add",
+        "estimated_offer_price", # Estimated offer price
         "company_name",
         "company_phone_number", # Company phone number
         "company_mailing_add",
@@ -989,6 +990,7 @@ def create_csv_files(postcards_list, client):
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
                     "seller_mailing_add":           seller_mailing_add,
+                    "estimated_offer_price":        int(postcard.property_data.total_value * 0.85),
                     "company_name":                 postcard.company_name,
                     "company_phone_number":         postcard.company_phone_number,
                     "company_mailing_add":          company_mailing_add,
@@ -1139,8 +1141,8 @@ if __name__ == "__main__":
             i = 0
             for property_data in client.marketing_list:
                 # Determine the template to use for each property data
-                postcard_name, postcard_number = get_template_for_property(property_data)
-                newPostcardTemplate = PostcardsList(property_data, postcard_name, postcard_number)
+                postcard_name, postcard_number, postcard_gender = get_template_for_property(property_data)
+                newPostcardTemplate = PostcardsList(property_data, postcard_name, postcard_number, postcard_gender)
                 newPostcardTemplate.assign_company_information(client)
                 newPostcardTemplate.assign_owner_information(property_data, client) 
                 newPostcardTemplate.assign_colors(client)
