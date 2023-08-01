@@ -6,13 +6,14 @@ import os
 import sys
 import pandas as pd
 
-INPUT_CLIENTS_DATA      = 'input/template_data - clients_data.csv'
-INPUT_COLORS_RULES      = 'input/template_data - color_rules.csv'
-INPUT_POSTCARD_RULES    = 'input/template_data - postcard_sequence.csv'
-INPUT_CLIENTS_LOGOS     = 'input/template_data - clients_logos.csv'
-INPUT_CLIENTS_ADDRESS   = 'input/template_data - clients_address.csv'
-INPUT_CLIENTS_PHONES    = 'input/template_data - clients_phones.csv'
-INPUT_CLIENTS_BG_IMG    = "input/template_data - clients_bg_img.csv"
+INPUT_CLIENTS_DATA          = 'input/template_data - clients_data.csv'
+INPUT_COLORS_RULES          = 'input/template_data - color_rules.csv'
+INPUT_POSTCARD_RULES        = 'input/template_data - postcard_sequence.csv'
+INPUT_CLIENTS_LOGOS         = 'input/template_data - clients_logos.csv'
+INPUT_CLIENTS_ADDRESS       = 'input/template_data - clients_address.csv'
+INPUT_CLIENTS_PHONES        = 'input/template_data - clients_phones.csv'
+INPUT_CLIENTS_BG_IMG        = "input/template_data - clients_bg_img.csv"
+INPUT_CLIENTS_OFFER_PRICE   = "input/template_data - clients_offer_price.csv"
 DEBUG_MODE = True
 
 class PostcardsList:
@@ -196,7 +197,7 @@ class PostcardsList:
         with open(INPUT_CLIENTS_BG_IMG, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                if row['Company Name'] == self.company_name and str(row["Template Number"]) == str(self.postcard_number):
+                if row['Company Name'] == self.company_name and str(row["Template Number"]) == str(self.postcard_number):             
                     self.bg_img = row[self.property_data.seller_avatar_group]
                     return True
             print("Could not find a matching background for this postcard number\n\n")
@@ -308,6 +309,7 @@ class Client:
         self.additional_comments = additional_comments
         self.share_results = share_results
         self.get_client_address()
+        self.get_offer_price()
     
     def __str__(self):
         table = f"""
@@ -403,6 +405,16 @@ class Client:
                 self.company_mailing_state = "Not found"
                 self.company_mailing_zip = "Not found"    
     
+    def get_offer_price(self):
+        with open(INPUT_CLIENTS_OFFER_PRICE, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['Company Name'] == self.company_name:
+                    self.offer_price = int(row['Price Offer Rate'])/100
+                    break
+            else:
+                self.offer_price = .85 
+    
     @staticmethod
     def center_text(text, width):
         return text.center(width)
@@ -489,7 +501,6 @@ def read_marketing_list_csv(file_name):
             score = row['SCORE']
             distress_points = row['LIKELY DEAL SCORE']
             avatar = row['BUYBOX SCORE']
-            total_value = int(row['TOTAL VALUE'].replace('$', '').replace(',', ''))
             property_type = row['PROPERTY TYPE']
             link_properties = row['LINK PROPERTIES']
             tags = row['TAGS']
@@ -525,10 +536,19 @@ def read_marketing_list_csv(file_name):
             targeted_group_name = row['TARGETED GROUP NAME']
             targeted_group_message = row['TARGETED GROUP MESSAGE']
             
+            if row['TARGETED GROUP NAME'] == "No distresses":
+                targeted_group_name = "Absentee"
+                
             try:
                 num_dm = int(row['MARKETING DM COUNT'])
             except:
                 num_dm = 0
+                
+            try:
+                total_value = int(row['TOTAL VALUE'].replace('$', '').replace(',', ''))
+            except:
+                if row['TOTAL VALUE'] == 'N/A' or row['TOTAL VALUE'] == 'n/a' or row['TOTAL VALUE'] == "":
+                    total_value = 0
         
             property_data = PropertyData(folio, owner_full_name, owner_first_name, owner_last_name, address, city,
                                          state, zip_code, county, mailing_address, mailing_city, mailing_state,
@@ -574,11 +594,15 @@ def load_postcard_rules(fileName):
     return rules_data
 
 def get_template_for_property(property_data):
-    # load_sequence_step
-    sequence_step = (property_data.num_dm % 4) + 1
+    
+    if property_data.total_value < 5000 or property_data.total_value == "":
+        sequence_step = ((property_data.num_dm + 1) % 4) + 1
+    else:
+        sequence_step = (property_data.num_dm % 4) + 1
+    
     property_data.sequence_step = str(sequence_step)
     rules_data = load_postcard_rules(csv_to_json(INPUT_POSTCARD_RULES))
-    for rule in rules_data:
+    for rule in rules_data:       
         if (
             rule["Group Name"]                  == property_data.seller_avatar_group
             and str(rule["Sequence Step"])      == str(sequence_step)
@@ -749,7 +773,7 @@ def get_template_for_property(property_data):
                 ):
                 print("\t\t\tError rule -> 20")
                 sys.exit(1)
-                        
+                               
             return str(rule["Template Name"]), str(rule["Template Number"]), rule["Postcard Gender"]
     print("[ERROR] Template not found: ",)
     return None, None
@@ -990,7 +1014,7 @@ def create_csv_files(postcards_list, client):
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
                     "seller_mailing_add":           seller_mailing_add,
-                    "estimated_offer_price":        int(postcard.property_data.total_value * 0.85),
+                    "estimated_offer_price":        int(postcard.property_data.total_value * client.offer_price),
                     "company_name":                 postcard.company_name,
                     "company_phone_number":         postcard.company_phone_number,
                     "company_mailing_add":          company_mailing_add,
@@ -1113,7 +1137,7 @@ def find_marketingList(company_name):
 
 def checking_test_percentage(client):
     # generate a random number between 0 and 100
-    random_number = random.randint(0, 100)
+    random_number = random.randint(1, 100)
     # if the random number is less than the given percentage, return 0
     if random_number <= client.test_percentage:
         return True
@@ -1125,8 +1149,9 @@ if __name__ == "__main__":
     clients = read_clients_data(INPUT_CLIENTS_DATA)
     # Iterate over each client
     for client in clients:
-        print("Client:\t", client.company_name)
-        print("Checking test percentage... ", client.test_percentage, "%" )
+        print("Client:",client.company_name)
+        print("\tChecking test amount:\t", client.test_percentage, "%" )
+        print("\tChecking offer price:\t", int(client.offer_price*100), "%" )
         if find_marketingList(client.company_name):
             create_client_folder(client)
             postcards_list = list()
@@ -1152,7 +1177,7 @@ if __name__ == "__main__":
                 newPostcardTemplate.assign_google_street_view()
                 postcards_list.append(newPostcardTemplate) 
             create_csv_files(postcards_list, client)   
-        print("\t\tCompleted\n")         
+        print("\tCompleted\n")         
                
 # Falta agregar una funcion que tome el test_percentage de un cliente
 # y asigne la propiedad a un postcard con nuestro template o no, y cree otro archivo.
