@@ -850,6 +850,16 @@ def generate_qr_code_url(url):
     # return qr_code_url
     return url
 
+def get_quarter(index, total_size):
+    if index < total_size / 4:
+        return 1
+    elif index < total_size / 2:
+        return 2
+    elif index < 3 * total_size / 4:
+        return 3
+    else:
+        return 4
+
 def create_csv_files(postcards_list, client):
     fieldnames = [
         "DM CASE STUDY",
@@ -940,12 +950,14 @@ def create_csv_files(postcards_list, client):
         "block_color_2",
         "google_street_view",
         "image",
-        "postcard_size" 
+        "postcard_size",
+        "Drop #"
     ]            
     with open("results/" + client.company_name + "/FULL-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
-        for postcard in postcards_list:
+        
+        for i, postcard in enumerate(postcards_list):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
             
@@ -1039,7 +1051,8 @@ def create_csv_files(postcards_list, client):
                     "block_color_2":                postcard.block_color_2,
                     "google_street_view":           postcard.google_street_view_url,
                     "image":                        postcard.bg_img,
-                    "postcard_size":                client.postcard_size
+                    "postcard_size":                client.postcard_size,
+                    "Drop #":                       get_quarter(i, len(postcards_list))
                 })
             else:
                 writer.writerow({
