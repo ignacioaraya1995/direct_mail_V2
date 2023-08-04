@@ -1,0 +1,12 @@
+
+input/template_data - postcard_sequence.csv
+input/template_data - color_rules.csv
+input/template_data - clients_offer_price.csv
+input/template_data - clients_logos.csv
+input/template_data - clients_data.csv
+input/template_data - clients_bg_img.csv
+input/template_data - clients_address.csv
+input/marketingLists/Sell Quick Tampa.csv
+input/marketingLists/.DS_Store
+input/.DS_Store
+*.csv

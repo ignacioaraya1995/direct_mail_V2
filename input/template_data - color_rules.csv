@@ -35,12 +35,12 @@ LVN Real Estate,font_color_3,#081330,#081330,#081330,#E6F4FF
 LVN Real Estate,font_color_4,,#F4C300,#2C78E4,
 LVN Real Estate,block_color_1,#2D924A,#2D924A,#2D924A,#2D924A
 LVN Real Estate,block_color_2,#1C592D,#E6F4FF,#F4C300,
-"Jax Freedom Home Buyers, LLC",font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
-"Jax Freedom Home Buyers, LLC",font_color_2,#BB2C30,#BB2C30,#BB2C30,#BB2C30
-"Jax Freedom Home Buyers, LLC",font_color_3,#081330,#081330,#081330,#E6F4FF
-"Jax Freedom Home Buyers, LLC",font_color_4,,#F4C300,#2C78E4,
-"Jax Freedom Home Buyers, LLC",block_color_1,#23254D,#23254D,#23254D,#23254D
-"Jax Freedom Home Buyers, LLC",block_color_2,#333672,#E6F4FF,#BB2C30,
+Obi Buys,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+Obi Buys,font_color_2,#BB2C30,#BB2C30,#BB2C30,#BB2C30
+Obi Buys,font_color_3,#081330,#081330,#081330,#E6F4FF
+Obi Buys,font_color_4,,#F4C300,#2C78E4,
+Obi Buys,block_color_1,#23254D,#23254D,#23254D,#23254D
+Obi Buys,block_color_2,#333672,#E6F4FF,#BB2C30,
 TN HomeBuyers,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
 TN HomeBuyers,font_color_2,#F00F10,#F00F10,#F00F10,#F00F10
 TN HomeBuyers,font_color_3,#081330,#081330,#081330,#E6F4FF
@@ -59,3 +59,9 @@ BBPOFL,font_color_3,#081330,#081330,#081330,#E6F4FF
 BBPOFL,font_color_4,,#F4C300,#2C78E4,
 BBPOFL,block_color_1,#30A5B6,#30A5B6,#30A5B6,#30A5B6
 BBPOFL,block_color_2,#57A7B3,#E6F4FF,#EF801B,
+Sell Quick Tampa,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+Sell Quick Tampa,font_color_2,#F1C100,#F1C100,#F1C100,#F1C100
+Sell Quick Tampa,font_color_3,#081330,#081330,#081330,#E6F4FF
+Sell Quick Tampa,font_color_4,,#F4C300,#2C78E4,
+Sell Quick Tampa,block_color_1,#0071BD,#0071BD,#0071BD,#0071BD
+Sell Quick Tampa,block_color_2,#005A96,#E6F4FF,#F1C100,

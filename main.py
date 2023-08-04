@@ -1014,7 +1014,7 @@ def create_csv_files(postcards_list, client):
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
                     "seller_mailing_add":           seller_mailing_add,
-                    "estimated_offer_price":        int(postcard.property_data.total_value * client.offer_price),
+                    "estimated_offer_price":        "$" + str(int(postcard.property_data.total_value * client.offer_price)),
                     "company_name":                 postcard.company_name,
                     "company_phone_number":         postcard.company_phone_number,
                     "company_mailing_add":          company_mailing_add,
@@ -1177,7 +1177,9 @@ if __name__ == "__main__":
                 newPostcardTemplate.assign_google_street_view()
                 postcards_list.append(newPostcardTemplate) 
             create_csv_files(postcards_list, client)   
-        print("\tCompleted\n")         
+            print("\tCompleted\n")  
+        else:
+            print("\tPass\n")         
                
 # Falta agregar una funcion que tome el test_percentage de un cliente
 # y asigne la propiedad a un postcard con nuestro template o no, y cree otro archivo.
