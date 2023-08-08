@@ -860,6 +860,16 @@ def get_quarter(index, total_size):
     else:
         return 4
 
+def calculate_estimate_cash_offer(total_value, offer_price):
+    if int(total_value*offer_price) < 15000 and offer_price > 0:
+        return "-"
+    else:
+        return 
+            "$"+str(int(total_value*offer_price))
+    """
+    Pending the new fields.
+    """
+
 def create_csv_files(postcards_list, client):
     fieldnames = [
         "DM CASE STUDY",
@@ -961,6 +971,10 @@ def create_csv_files(postcards_list, client):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
             
+            
+            estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)
+            
+            
             if checking_test_percentage(client):   
                 writer.writerow({
                     "DM CASE STUDY":                True,
@@ -1026,7 +1040,7 @@ def create_csv_files(postcards_list, client):
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
                     "seller_mailing_add":           seller_mailing_add,
-                    "estimated_offer_price":        "$" + str(int(postcard.property_data.total_value * client.offer_price)),
+                    "estimated_offer_price":        estimate_cash_offer,
                     "company_name":                 postcard.company_name,
                     "company_phone_number":         postcard.company_phone_number,
                     "company_mailing_add":          company_mailing_add,
