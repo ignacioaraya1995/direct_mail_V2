@@ -1,5 +1,6 @@
 import csv
 import re
+import sys
 import json
 import random
 import os
@@ -14,6 +15,7 @@ INPUT_CLIENTS_ADDRESS       = 'input/template_data - clients_address.csv'
 INPUT_CLIENTS_PHONES        = 'input/template_data - clients_phones.csv'
 INPUT_CLIENTS_BG_IMG        = "input/template_data - clients_bg_img.csv"
 INPUT_CLIENTS_OFFER_PRICE   = "input/template_data - clients_offer_price.csv"
+INPUT_CLIENTS_TEXTS         = "input/template_data - clients_texts.csv"
 DEBUG_MODE = True
 
 class PostcardsList:
@@ -309,6 +311,7 @@ class Client:
         self.additional_comments = additional_comments
         self.share_results = share_results
         self.get_client_address()
+        self.get_clients_texts()
         self.get_offer_price()
     
     def __str__(self):
@@ -403,7 +406,38 @@ class Client:
                 self.company_mailing_address = "Not found"
                 self.company_mailing_city = "Not found"
                 self.company_mailing_state = "Not found"
-                self.company_mailing_zip = "Not found"    
+                self.company_mailing_zip = "Not found"
+                
+    def get_clients_texts(self):
+        with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['Company Name'] == self.company_name:
+                    self.T1_text_1= row['T1_text_1']
+                    self.T1_text_2= row['T1_text_2']
+                    self.T1_text_3= row['T1_text_3']
+                    self.T1_text_4= row['T1_text_4']
+                    self.T1_text_5= row['T1_text_5']
+                    self.T1_text_6= row['T1_text_6']
+                    self.T2_text_1= row['T2_text_1']
+                    self.T2_text_2= row['T2_text_2']
+                    self.T2_text_3= row['T2_text_3']
+                    self.T2_text_4= row['T2_text_4']
+                    self.T3_text_1= row['T3_text_1']
+                    self.T3_text_2= row['T3_text_2']
+                    self.T3_text_3= row['T3_text_3']
+                    self.T3_text_4= row['T3_text_4']
+                    self.T3_text_5= row['T3_text_5']
+                    self.T3_text_6= row['T3_text_6']
+                    self.T4_text_1= row['T4_text_1']
+                    self.T4_text_2= row['T4_text_2']
+                    self.T4_text_3= row['T4_text_3']
+                    self.T4_text_4= row['T4_text_4']
+                    return True
+                else:
+                    pass
+            print("Error with client: ", self.company_name)
+            sys.exit(1)     
     
     def get_offer_price(self):
         with open(INPUT_CLIENTS_OFFER_PRICE, 'r') as file:
@@ -864,8 +898,7 @@ def calculate_estimate_cash_offer(total_value, offer_price):
     if int(total_value*offer_price) < 15000 and offer_price > 0:
         return "-"
     else:
-        return 
-            "$"+str(int(total_value*offer_price))
+        return str("$" + str(int(total_value*offer_price)))
     """
     Pending the new fields.
     """
@@ -952,6 +985,26 @@ def create_csv_files(postcards_list, client):
         "cred_logo_2",
         "cred_logo_3",
         "cred_logo_4",
+        "T1_text_1",
+        "T1_text_2",
+        "T1_text_3",
+        "T1_text_4",
+        "T1_text_5",
+        "T1_text_6",
+        "T2_text_1",
+        "T2_text_2",
+        "T2_text_3",
+        "T2_text_4",
+        "T3_text_1",
+        "T3_text_2",
+        "T3_text_3",
+        "T3_text_4",
+        "T3_text_5",
+        "T3_text_6",
+        "T4_text_1",
+        "T4_text_2",
+        "T4_text_3",
+        "T4_text_4",
         "font_color_1",
         "font_color_2",
         "font_color_3",
@@ -970,11 +1023,7 @@ def create_csv_files(postcards_list, client):
         for i, postcard in enumerate(postcards_list):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
-            
-            
             estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)
-            
-            
             if checking_test_percentage(client):   
                 writer.writerow({
                     "DM CASE STUDY":                True,
@@ -1057,6 +1106,26 @@ def create_csv_files(postcards_list, client):
                     "cred_logo_2":                  postcard.cred_logo_2,
                     "cred_logo_3":                  postcard.cred_logo_3,
                     "cred_logo_4":                  postcard.cred_logo_4,
+                    "T1_text_1":                    client.T1_text_1,
+                    "T1_text_2":                    client.T1_text_2,
+                    "T1_text_3":                    client.T1_text_3,
+                    "T1_text_4":                    client.T1_text_4,
+                    "T1_text_5":                    client.T1_text_5,
+                    "T1_text_6":                    client.T1_text_6,
+                    "T2_text_1":                    client.T2_text_1,
+                    "T2_text_2":                    client.T2_text_2,
+                    "T2_text_3":                    client.T2_text_3,
+                    "T2_text_4":                    client.T2_text_4,
+                    "T3_text_1":                    client.T3_text_1,
+                    "T3_text_2":                    client.T3_text_2,
+                    "T3_text_3":                    client.T3_text_3,
+                    "T3_text_4":                    client.T3_text_4,
+                    "T3_text_5":                    client.T3_text_5,
+                    "T3_text_6":                    client.T3_text_6,
+                    "T4_text_1":                    client.T4_text_1,
+                    "T4_text_2":                    client.T4_text_2,
+                    "T4_text_3":                    client.T4_text_3,
+                    "T4_text_4":                    client.T4_text_4,
                     "font_color_1":                 postcard.font_color_1,
                     "font_color_2":                 postcard.font_color_2,
                     "font_color_3":                 postcard.font_color_3,

@@ -5,12 +5,12 @@ Atlas Property investors,font_color_3,#081330,#081330,#081330,#E6F4FF
 Atlas Property investors,font_color_4,,#F4C300,#2C78E4,
 Atlas Property investors,block_color_1,#222B47,#222B47,#222B47,#222B47
 Atlas Property investors,block_color_2,#324582,#E6F4FF,#3FC3FF,
-Win Win Property Buyer,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
-Win Win Property Buyer,font_color_2,#FCC54E,#FCC54E,#FCC54E,#FCC54E
-Win Win Property Buyer,font_color_3,#081330,#081330,#081330,#E6F4FF
-Win Win Property Buyer,font_color_4,,#F4C300,#2C78E4,
-Win Win Property Buyer,block_color_1,#1C4894,#1C4894,#1C4894,#1C4894
-Win Win Property Buyer,block_color_2,#003289,#E6F4FF,#FCC54E,
+Phil Buys Houses Fast,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+Phil Buys Houses Fast,font_color_2,#FCC54E,#FCC54E,#FCC54E,#FCC54E
+Phil Buys Houses Fast,font_color_3,#081330,#081330,#081330,#E6F4FF
+Phil Buys Houses Fast,font_color_4,,#F4C300,#2C78E4,
+Phil Buys Houses Fast,block_color_1,#1C4894,#1C4894,#1C4894,#1C4894
+Phil Buys Houses Fast,block_color_2,#003289,#E6F4FF,#FCC54E,
 MaxReturns,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
 MaxReturns,font_color_2,#FDDC01,#FDDC01,#FDDC01,#FDDC01
 MaxReturns,font_color_3,#081330,#081330,#081330,#E6F4FF
@@ -65,3 +65,9 @@ Sell Quick Tampa,font_color_3,#081330,#081330,#081330,#E6F4FF
 Sell Quick Tampa,font_color_4,,#F4C300,#2C78E4,
 Sell Quick Tampa,block_color_1,#0071BD,#0071BD,#0071BD,#0071BD
 Sell Quick Tampa,block_color_2,#005A96,#E6F4FF,#F1C100,
+Property Spot,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+Property Spot,font_color_2,#000000,#000000,#000000,#000000
+Property Spot,font_color_3,#081330,#081330,#E6F4FF,#E6F4FF
+Property Spot,font_color_4,,#F4C300,#2C78E4,
+Property Spot,block_color_1,#1CB46D,#1CB46D,#1CB46D,#1CB46D
+Property Spot,block_color_2,#158B54,#E6F4FF,#000000,
