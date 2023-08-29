@@ -69,5 +69,5 @@ Property Spot,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
 Property Spot,font_color_2,#000000,#000000,#000000,#000000
 Property Spot,font_color_3,#081330,#081330,#E6F4FF,#E6F4FF
 Property Spot,font_color_4,,#F4C300,#2C78E4,
-Property Spot,block_color_1,#1CB46D,#1CB46D,#1CB46D,#1CB46D
-Property Spot,block_color_2,#158B54,#E6F4FF,#000000,
+Property Spot,block_color_1,#1DBF73,#1DBF73,#1DBF73,#1DBF73
+Property Spot,block_color_2,#169B5D,#E6F4FF,#000000,

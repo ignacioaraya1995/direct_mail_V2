@@ -219,7 +219,7 @@ class PropertyData:
                  golden_zip_code, action_plans, property_status, score, distress_points, avatar, property_type,
                  link_properties, hidden_gems, tags, absentee, high_equity, downsizing, pre_foreclosure, vacant,
                  fifty_five_plus, estate, inter_family_transfer, divorce, taxes, probate, low_credit, code_violations,
-                 bankruptcy, liens, eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_dm,
+                 bankruptcy, liens_city, liens_other, liens_utility, liens_hoa,  liens_mechanic, eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_dm,
                  seller_avatar_group, targeted_testimonial, main_distress_1, main_distress_2,
                  main_distress_3, main_distress_4, targeted_message_1, targeted_message_2, targeted_message_3,
                  targeted_message_4):
@@ -263,7 +263,11 @@ class PropertyData:
         self.low_credit = low_credit
         self.code_violations = code_violations
         self.bankruptcy = bankruptcy
-        self.liens = liens
+        self.liens_city = liens_city
+        self.liens_other = liens_other
+        self.liens_utility = liens_utility
+        self.liens_hoa = liens_hoa
+        self.liens_mechanic = liens_mechanic
         self.eviction = eviction
         self.thirty_sixty_days = thirty_sixty_days
         self.judgment = judgment
@@ -311,9 +315,17 @@ class Client:
         self.additional_comments = additional_comments
         self.share_results = share_results
         self.get_client_address()
-        self.get_clients_texts()
         self.get_offer_price()
-    
+        self.text_1 = []
+        self.text_2 = []
+        self.text_3 = []
+        self.text_4 = []
+        self.text_5 = []
+        self.text_6 = []
+        self.text_7 = []
+        self.text_8 = []
+        self.text_9 = []
+
     def __str__(self):
         table = f"""
             ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
@@ -407,37 +419,6 @@ class Client:
                 self.company_mailing_city = "Not found"
                 self.company_mailing_state = "Not found"
                 self.company_mailing_zip = "Not found"
-                
-    def get_clients_texts(self):
-        with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row['Company Name'] == self.company_name:
-                    self.T1_text_1= row['T1_text_1']
-                    self.T1_text_2= row['T1_text_2']
-                    self.T1_text_3= row['T1_text_3']
-                    self.T1_text_4= row['T1_text_4']
-                    self.T1_text_5= row['T1_text_5']
-                    self.T1_text_6= row['T1_text_6']
-                    self.T2_text_1= row['T2_text_1']
-                    self.T2_text_2= row['T2_text_2']
-                    self.T2_text_3= row['T2_text_3']
-                    self.T2_text_4= row['T2_text_4']
-                    self.T3_text_1= row['T3_text_1']
-                    self.T3_text_2= row['T3_text_2']
-                    self.T3_text_3= row['T3_text_3']
-                    self.T3_text_4= row['T3_text_4']
-                    self.T3_text_5= row['T3_text_5']
-                    self.T3_text_6= row['T3_text_6']
-                    self.T4_text_1= row['T4_text_1']
-                    self.T4_text_2= row['T4_text_2']
-                    self.T4_text_3= row['T4_text_3']
-                    self.T4_text_4= row['T4_text_4']
-                    return True
-                else:
-                    pass
-            print("Error with client: ", self.company_name)
-            sys.exit(1)     
     
     def get_offer_price(self):
         with open(INPUT_CLIENTS_OFFER_PRICE, 'r') as file:
@@ -468,7 +449,7 @@ def read_clients_data(file_name):
                 row['Company Name'],
                 row['Name of Main Point of Contact'],
                 row['Email of Main Point of Contact'],
-                extract_tracking_number(row['Cell Phone of Main Point of Contact']),
+                format_phone_number(row['Cell Phone of Main Point of Contact']),
                 row['Company mailing Address (Street, City, State, ZIP) for return mail'],
                 standardize_url(row['Company Website (seller facing)']),
                 standardize_url(row['Company Logo']),
@@ -553,7 +534,11 @@ def read_marketing_list_csv(file_name):
             low_credit = row['LOW CREDIT']
             code_violations = row['CODE VIOLATIONS']
             bankruptcy = row['BANKRUPTCY']
-            liens = row['LIENS']
+            liens_city = row['LIENS CITY/COUNTY']
+            liens_other = row['LIENS OTHER']
+            liens_utility = row['LIENS UTILITY']
+            liens_hoa = row['LIENS HOA']
+            liens_mechanic = row['LIENS MECHANIC']
             eviction = row['EVICTION']
             thirty_sixty_days = row['30-60 DAYS']
             judgment = row['JUDGEMENT']
@@ -590,7 +575,8 @@ def read_marketing_list_csv(file_name):
                                          action_plans, property_status, score, distress_points, avatar, property_type,
                                          link_properties, hidden_gems, tags, absentee, high_equity, downsizing,
                                          pre_foreclosure, vacant, fifty_five_plus, estate, inter_family_transfer,
-                                         divorce, taxes, probate, low_credit, code_violations, bankruptcy, liens,
+                                         divorce, taxes, probate, low_credit, code_violations, bankruptcy, liens_city,
+                                         liens_other, liens_utility, liens_hoa,  liens_mechanic,
                                          eviction, thirty_sixty_days, judgment, debt_collection, total_value, num_dm,
                                          targeted_group_name, targeted_group_message,
                                          main_distress_1, main_distress_2, main_distress_3, main_distress_4,
@@ -604,6 +590,14 @@ def extract_tracking_number(tracking_number):
     """
     numeric_only = re.sub(r'\D', '', tracking_number)
     return numeric_only
+
+def format_phone_number(phone_number):
+    """
+    Formats a 10-digit phone number into the format (xxx) xxx-xxxx.
+    """
+    numeric_only = re.sub(r'\D', '', phone_number)
+    formatted_number = "({}) {}-{}".format(numeric_only[:3], numeric_only[3:6], numeric_only[6:])
+    return formatted_number
 
 def standardize_url(url):
     """
@@ -947,7 +941,11 @@ def create_csv_files(postcards_list, client):
         "LOW CREDIT",
         "CODE VIOLATIONS",
         "BANKRUPTCY",
-        "LIENS",
+        "LIENS CITY/COUNTY",
+        "LIENS OTHER",
+        "LIENS UTILITY",
+        "LIENS HOA",
+        "LIENS MECHANIC",
         "EVICTION",
         "30-60 DAYS",
         "JUDGEMENT",
@@ -985,26 +983,15 @@ def create_csv_files(postcards_list, client):
         "cred_logo_2",
         "cred_logo_3",
         "cred_logo_4",
-        "T1_text_1",
-        "T1_text_2",
-        "T1_text_3",
-        "T1_text_4",
-        "T1_text_5",
-        "T1_text_6",
-        "T2_text_1",
-        "T2_text_2",
-        "T2_text_3",
-        "T2_text_4",
-        "T3_text_1",
-        "T3_text_2",
-        "T3_text_3",
-        "T3_text_4",
-        "T3_text_5",
-        "T3_text_6",
-        "T4_text_1",
-        "T4_text_2",
-        "T4_text_3",
-        "T4_text_4",
+        "text_1",
+        "text_2",
+        "text_3",
+        "text_4",
+        "text_5",
+        "text_6",
+        "text_7",
+        "text_8",
+        "text_9",
         "font_color_1",
         "font_color_2",
         "font_color_3",
@@ -1068,7 +1055,11 @@ def create_csv_files(postcards_list, client):
                     "LOW CREDIT":                   postcard.property_data.low_credit,
                     "CODE VIOLATIONS":              postcard.property_data.code_violations,
                     "BANKRUPTCY":                   postcard.property_data.bankruptcy,
-                    "LIENS":                        postcard.property_data.liens,
+                    "LIENS CITY/COUNTY":            postcard.property_data.liens_city,
+                    "LIENS OTHER":                  postcard.property_data.liens_other,
+                    "LIENS UTILITY":                postcard.property_data.liens_utility,
+                    "LIENS HOA":                    postcard.property_data.liens_hoa,
+                    "LIENS MECHANIC":               postcard.property_data.liens_mechanic,
                     "EVICTION":                     postcard.property_data.eviction,
                     "30-60 DAYS":                   postcard.property_data.thirty_sixty_days,
                     "JUDGEMENT":                    postcard.property_data.judgment,
@@ -1106,26 +1097,15 @@ def create_csv_files(postcards_list, client):
                     "cred_logo_2":                  postcard.cred_logo_2,
                     "cred_logo_3":                  postcard.cred_logo_3,
                     "cred_logo_4":                  postcard.cred_logo_4,
-                    "T1_text_1":                    client.T1_text_1,
-                    "T1_text_2":                    client.T1_text_2,
-                    "T1_text_3":                    client.T1_text_3,
-                    "T1_text_4":                    client.T1_text_4,
-                    "T1_text_5":                    client.T1_text_5,
-                    "T1_text_6":                    client.T1_text_6,
-                    "T2_text_1":                    client.T2_text_1,
-                    "T2_text_2":                    client.T2_text_2,
-                    "T2_text_3":                    client.T2_text_3,
-                    "T2_text_4":                    client.T2_text_4,
-                    "T3_text_1":                    client.T3_text_1,
-                    "T3_text_2":                    client.T3_text_2,
-                    "T3_text_3":                    client.T3_text_3,
-                    "T3_text_4":                    client.T3_text_4,
-                    "T3_text_5":                    client.T3_text_5,
-                    "T3_text_6":                    client.T3_text_6,
-                    "T4_text_1":                    client.T4_text_1,
-                    "T4_text_2":                    client.T4_text_2,
-                    "T4_text_3":                    client.T4_text_3,
-                    "T4_text_4":                    client.T4_text_4,
+                    "text_1":                       get_text_by_postcard_name_1("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_2":                       get_text_by_postcard_name_2("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_3":                       get_text_by_postcard_name_3("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_4":                       get_text_by_postcard_name_4("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_5":                       get_text_by_postcard_name_5("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_6":                       get_text_by_postcard_name_6("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_7":                       get_text_by_postcard_name_7("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_8":                       get_text_by_postcard_name_8("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_9":                       get_text_by_postcard_name_9("Phil Buys Houses Fast", "T" + postcard.postcard_number),
                     "font_color_1":                 postcard.font_color_1,
                     "font_color_2":                 postcard.font_color_2,
                     "font_color_3":                 postcard.font_color_3,
@@ -1181,7 +1161,11 @@ def create_csv_files(postcards_list, client):
                     "LOW CREDIT":                   postcard.property_data.low_credit,
                     "CODE VIOLATIONS":              postcard.property_data.code_violations,
                     "BANKRUPTCY":                   postcard.property_data.bankruptcy,
-                    "LIENS":                        postcard.property_data.liens,
+                    "LIENS CITY/COUNTY":            postcard.property_data.liens_city,
+                    "LIENS OTHER":                  postcard.property_data.liens_other,
+                    "LIENS UTILITY":                postcard.property_data.liens_utility,
+                    "LIENS HOA":                    postcard.property_data.liens_hoa,
+                    "LIENS MECHANIC":               postcard.property_data.liens_mechanic,
                     "EVICTION":                     postcard.property_data.eviction,
                     "30-60 DAYS":                   postcard.property_data.thirty_sixty_days,
                     "JUDGEMENT":                    postcard.property_data.judgment,
@@ -1239,6 +1223,78 @@ def checking_test_percentage(client):
         return True
     else:
         return False
+
+def get_text_by_postcard_name_1(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_1"]
+    return None 
+
+def get_text_by_postcard_name_2(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_2"]
+    return None  
+
+def get_text_by_postcard_name_3(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_3"]
+    return None 
+
+def get_text_by_postcard_name_4(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_4"]
+    return None 
+
+def get_text_by_postcard_name_5(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_5"]
+    return None 
+
+def get_text_by_postcard_name_6(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_6"]
+    return None 
+
+def get_text_by_postcard_name_7(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_7"]
+    return None 
+
+def get_text_by_postcard_name_8(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_8"]
+    return None 
+
+def get_text_by_postcard_name_9(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_9"]
+    return None 
 
 if __name__ == "__main__":
     # Read clients' data from the specified CSV file
