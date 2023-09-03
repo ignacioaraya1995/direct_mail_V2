@@ -449,7 +449,7 @@ def read_clients_data(file_name):
                 row['Company Name'],
                 row['Name of Main Point of Contact'],
                 row['Email of Main Point of Contact'],
-                format_phone_number(row['Cell Phone of Main Point of Contact']),
+                row['Cell Phone of Main Point of Contact'],
                 row['Company mailing Address (Street, City, State, ZIP) for return mail'],
                 standardize_url(row['Company Website (seller facing)']),
                 standardize_url(row['Company Logo']),
@@ -589,13 +589,6 @@ def extract_tracking_number(tracking_number):
     Extracts the numeric portion from a tracking number by removing non-numeric characters.
     """
     numeric_only = re.sub(r'\D', '', tracking_number)
-    return numeric_only
-
-def format_phone_number(phone_number):
-    """
-    Formats a 10-digit phone number into the format (xxx) xxx-xxxx.
-    """
-    numeric_only = re.sub(r'\D', '', phone_number)
     formatted_number = "({}) {}-{}".format(numeric_only[:3], numeric_only[3:6], numeric_only[6:])
     return formatted_number
 
@@ -879,14 +872,12 @@ def generate_qr_code_url(url):
     return url
 
 def get_quarter(index, total_size):
-    if index < total_size / 4:
+    if index < total_size / 3:
         return 1
-    elif index < total_size / 2:
+    elif index < 2 * total_size / 3:
         return 2
-    elif index < 3 * total_size / 4:
-        return 3
     else:
-        return 4
+        return 3
 
 def calculate_estimate_cash_offer(total_value, offer_price):
     if int(total_value*offer_price) < 15000 and offer_price > 0:
