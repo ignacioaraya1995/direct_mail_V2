@@ -16,6 +16,7 @@ INPUT_CLIENTS_PHONES        = 'input/template_data - clients_phones.csv'
 INPUT_CLIENTS_BG_IMG        = "input/template_data - clients_bg_img.csv"
 INPUT_CLIENTS_OFFER_PRICE   = "input/template_data - clients_offer_price.csv"
 INPUT_CLIENTS_TEXTS         = "input/template_data - clients_texts.csv"
+INPUT_CLIENTS_CAMPAIGN      = "input/template_data - clients_campaign_data.csv"
 DEBUG_MODE = True
 
 class PostcardsList:
@@ -288,8 +289,8 @@ class PropertyData:
         self.targeted_message_4 = targeted_message_4
 
 class Client:
-    def __init__(self, timestamp, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results):
-        self.timestamp = timestamp
+    def __init__(self, client_id, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results):
+        self.client_id = client_id
         self.company_name = company_name
         self.contact_name = contact_name
         self.contact_email = contact_email
@@ -315,6 +316,7 @@ class Client:
         self.additional_comments = additional_comments
         self.share_results = share_results
         self.get_client_address()
+        self.get_client_campaign_data()
         self.get_offer_price()
         self.text_1 = []
         self.text_2 = []
@@ -325,13 +327,14 @@ class Client:
         self.text_7 = []
         self.text_8 = []
         self.text_9 = []
+        self.text_10 = []
 
     def __str__(self):
         table = f"""
             ╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
             ║{self.center_text("Client Information", 118)}║
             ╟────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╢
-            ║ Timestamp: {self.timestamp:<113}
+            ║ Timestamp: {self.client_id:<113}
             ║ Company Name: {self.company_name:<110}
             ║ Contact Name: {self.contact_name:<110}
             ║ Contact Email: {self.contact_email:<109}
@@ -420,6 +423,18 @@ class Client:
                 self.company_mailing_state = "Not found"
                 self.company_mailing_zip = "Not found"
     
+    def get_client_campaign_data(self):
+        with open(INPUT_CLIENTS_CAMPAIGN, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row['client_name'] == self.company_name:
+                    self.campaign_name = row['campaign_name']
+                    self.drop_nums = row['drop_nums']
+                    break
+            else:
+                self.self.campaign_name = "Not found"
+                self.drop_nums = "Not found"
+    
     def get_offer_price(self):
         with open(INPUT_CLIENTS_OFFER_PRICE, 'r') as file:
             reader = csv.DictReader(file)
@@ -445,7 +460,7 @@ def read_clients_data(file_name):
         reader = csv.DictReader(csvfile)
         for row in reader:
             client = Client(
-                row['Timestamp'],
+                row['client_id'],
                 row['Company Name'],
                 row['Name of Main Point of Contact'],
                 row['Email of Main Point of Contact'],
@@ -871,13 +886,9 @@ def generate_qr_code_url(url):
     # return qr_code_url
     return url
 
-def get_quarter(index, total_size):
-    if index < total_size / 3:
-        return 1
-    elif index < 2 * total_size / 3:
-        return 2
-    else:
-        return 3
+def get_drop_number(index, total_size, N):
+    return (index * N) // total_size + 1
+
 
 def calculate_estimate_cash_offer(total_value, offer_price):
     if int(total_value*offer_price) < 15000 and offer_price > 0:
@@ -890,6 +901,9 @@ def calculate_estimate_cash_offer(total_value, offer_price):
 
 def create_csv_files(postcards_list, client):
     fieldnames = [
+        "client_id",
+        "client_name",
+        "campaign_name",
         "DM CASE STUDY",
         "FOLIO",
         "OWNER FULL NAME",
@@ -983,6 +997,7 @@ def create_csv_files(postcards_list, client):
         "text_7",
         "text_8",
         "text_9",
+        "text_10",
         "font_color_1",
         "font_color_2",
         "font_color_3",
@@ -997,13 +1012,17 @@ def create_csv_files(postcards_list, client):
     with open("results/" + client.company_name + "/FULL-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
-        
+        count_drop_size = 0
         for i, postcard in enumerate(postcards_list):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
             estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)
-            if checking_test_percentage(client):   
+            if checking_test_percentage(client):  
+                count_drop_size += 1 
                 writer.writerow({
+                    "client_id":                    client.client_id,
+                    "client_name":                  client.company_name,
+                    "campaign_name":                client.campaign_name,
                     "DM CASE STUDY":                True,
                     "FOLIO":                        postcard.property_data.folio,
                     "OWNER FULL NAME":              postcard.property_data.owner_full_name,
@@ -1088,15 +1107,16 @@ def create_csv_files(postcards_list, client):
                     "cred_logo_2":                  postcard.cred_logo_2,
                     "cred_logo_3":                  postcard.cred_logo_3,
                     "cred_logo_4":                  postcard.cred_logo_4,
-                    "text_1":                       get_text_by_postcard_name_1("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_2":                       get_text_by_postcard_name_2("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_3":                       get_text_by_postcard_name_3("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_4":                       get_text_by_postcard_name_4("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_5":                       get_text_by_postcard_name_5("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_6":                       get_text_by_postcard_name_6("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_7":                       get_text_by_postcard_name_7("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_8":                       get_text_by_postcard_name_8("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_9":                       get_text_by_postcard_name_9("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_1":                       get_text_by_postcard_name_1(client.company_name, "T" + postcard.postcard_number),
+                    "text_2":                       get_text_by_postcard_name_2(client.company_name, "T" + postcard.postcard_number),
+                    "text_3":                       get_text_by_postcard_name_3(client.company_name, "T" + postcard.postcard_number),
+                    "text_4":                       get_text_by_postcard_name_4(client.company_name, "T" + postcard.postcard_number),
+                    "text_5":                       get_text_by_postcard_name_5(client.company_name, "T" + postcard.postcard_number),
+                    "text_6":                       get_text_by_postcard_name_6(client.company_name, "T" + postcard.postcard_number),
+                    "text_7":                       get_text_by_postcard_name_7(client.company_name, "T" + postcard.postcard_number),
+                    "text_8":                       get_text_by_postcard_name_8(client.company_name, "T" + postcard.postcard_number),
+                    "text_9":                       get_text_by_postcard_name_9(client.company_name, "T" + postcard.postcard_number),
+                    "text_10":                      get_text_by_postcard_name_10(client.company_name, "T" + postcard.postcard_number),
                     "font_color_1":                 postcard.font_color_1,
                     "font_color_2":                 postcard.font_color_2,
                     "font_color_3":                 postcard.font_color_3,
@@ -1106,10 +1126,13 @@ def create_csv_files(postcards_list, client):
                     "google_street_view":           postcard.google_street_view_url,
                     "image":                        postcard.bg_img,
                     "postcard_size":                client.postcard_size,
-                    "Drop #":                       get_quarter(i, len(postcards_list))
+                    "Drop #":                       get_drop_number(i, len(postcards_list),client.drop_nums)
                 })
             else:
                 writer.writerow({
+                    "client_id":                    client.client_id,
+                    "client_name":                  client.company_name,
+                    "campaign_name":                False,
                     "DM CASE STUDY":                False,
                     "FOLIO":                        postcard.property_data.folio,
                     "OWNER FULL NAME":              postcard.property_data.owner_full_name,
@@ -1172,7 +1195,8 @@ def create_csv_files(postcards_list, client):
                     "targeted_message_3":           postcard.property_data.targeted_message_3,
                     "targeted_message_4":           postcard.property_data.targeted_message_4,
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group                })
-
+        print("DropSize: ", count_drop_size)
+        
     if client.test_percentage != 100:
         df = pd.read_csv("results/" + client.company_name + "/FULL-" +client.company_name + ".csv")
             # Create two dataframes based on the "DM CASE STUDY" field
@@ -1285,6 +1309,14 @@ def get_text_by_postcard_name_9(company_name, postcard_name):
         for row in reader:
             if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
                 return row["text_9"]
+    return None 
+
+def get_text_by_postcard_name_10(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_10"]
     return None 
 
 if __name__ == "__main__":
