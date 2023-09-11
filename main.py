@@ -325,6 +325,7 @@ class Client:
         self.text_7 = []
         self.text_8 = []
         self.text_9 = []
+        self.text_10 = []
 
     def __str__(self):
         table = f"""
@@ -983,6 +984,7 @@ def create_csv_files(postcards_list, client):
         "text_7",
         "text_8",
         "text_9",
+        "text_10",
         "font_color_1",
         "font_color_2",
         "font_color_3",
@@ -1088,15 +1090,16 @@ def create_csv_files(postcards_list, client):
                     "cred_logo_2":                  postcard.cred_logo_2,
                     "cred_logo_3":                  postcard.cred_logo_3,
                     "cred_logo_4":                  postcard.cred_logo_4,
-                    "text_1":                       get_text_by_postcard_name_1("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_2":                       get_text_by_postcard_name_2("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_3":                       get_text_by_postcard_name_3("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_4":                       get_text_by_postcard_name_4("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_5":                       get_text_by_postcard_name_5("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_6":                       get_text_by_postcard_name_6("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_7":                       get_text_by_postcard_name_7("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_8":                       get_text_by_postcard_name_8("Phil Buys Houses Fast", "T" + postcard.postcard_number),
-                    "text_9":                       get_text_by_postcard_name_9("Phil Buys Houses Fast", "T" + postcard.postcard_number),
+                    "text_1":                       get_text_by_postcard_name_1(client.company_name, "T" + postcard.postcard_number),
+                    "text_2":                       get_text_by_postcard_name_2(client.company_name, "T" + postcard.postcard_number),
+                    "text_3":                       get_text_by_postcard_name_3(client.company_name, "T" + postcard.postcard_number),
+                    "text_4":                       get_text_by_postcard_name_4(client.company_name, "T" + postcard.postcard_number),
+                    "text_5":                       get_text_by_postcard_name_5(client.company_name, "T" + postcard.postcard_number),
+                    "text_6":                       get_text_by_postcard_name_6(client.company_name, "T" + postcard.postcard_number),
+                    "text_7":                       get_text_by_postcard_name_7(client.company_name, "T" + postcard.postcard_number),
+                    "text_8":                       get_text_by_postcard_name_8(client.company_name, "T" + postcard.postcard_number),
+                    "text_9":                       get_text_by_postcard_name_9(client.company_name, "T" + postcard.postcard_number),
+                    "text_10":                      get_text_by_postcard_name_10(client.company_name, "T" + postcard.postcard_number),
                     "font_color_1":                 postcard.font_color_1,
                     "font_color_2":                 postcard.font_color_2,
                     "font_color_3":                 postcard.font_color_3,
@@ -1285,6 +1288,14 @@ def get_text_by_postcard_name_9(company_name, postcard_name):
         for row in reader:
             if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
                 return row["text_9"]
+    return None 
+
+def get_text_by_postcard_name_10(company_name, postcard_name):
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
+                return row["text_10"]
     return None 
 
 if __name__ == "__main__":
