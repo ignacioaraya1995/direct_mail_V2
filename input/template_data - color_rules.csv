@@ -71,3 +71,15 @@ Property Spot,font_color_3,#081330,#081330,#E6F4FF,#E6F4FF
 Property Spot,font_color_4,,#F4C300,#2C78E4,
 Property Spot,block_color_1,#1DBF73,#1DBF73,#1DBF73,#1DBF73
 Property Spot,block_color_2,#169B5D,#E6F4FF,#000000,
+Tampa Standard,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+Tampa Standard,font_color_2,#E8BB19,#E8BB19,#E8BB19,#E8BB19
+Tampa Standard,font_color_3,#081330,#081330,#081330,#E6F4FF
+Tampa Standard,font_color_4,,#F4C300,#2C78E4,
+Tampa Standard,block_color_1,#4D689D,#4D689D,#4D689D,#4D689D
+Tampa Standard,block_color_2,#355492,#E6F4FF,#E8BB19,
+Abode Homebuyers,font_color_1,#E6F4FF,#E6F4FF,#E6F4FF,#081330
+Abode Homebuyers,font_color_2,#FFCC00,#FFCC00,#FFCC00,#FFCC00
+Abode Homebuyers,font_color_3,#081330,#081330,#081330,#E6F4FF
+Abode Homebuyers,font_color_4,,#F4C300,#2C78E4,
+Abode Homebuyers,block_color_1,#0066F9,#0066F9,#0066F9,#0066F9
+Abode Homebuyers,block_color_2,#0046AB,#E6F4FF,#FFCC00,

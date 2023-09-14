@@ -7,6 +7,8 @@ import os
 import sys
 import pandas as pd
 
+INPUT_FILE                  = 'template_data.xlsx'
+
 INPUT_CLIENTS_DATA          = 'input/template_data - clients_data.csv'
 INPUT_COLORS_RULES          = 'input/template_data - color_rules.csv'
 INPUT_POSTCARD_RULES        = 'input/template_data - postcard_sequence.csv'
@@ -432,7 +434,7 @@ class Client:
                     self.drop_nums = row['drop_nums']
                     break
             else:
-                self.self.campaign_name = "Not found"
+                self.campaign_name = "Not found"
                 self.drop_nums = "Not found"
     
     def get_offer_price(self):
@@ -448,6 +450,15 @@ class Client:
     @staticmethod
     def center_text(text, width):
         return text.center(width)
+
+def excel_to_csv_start(excel_file):
+    xls = pd.ExcelFile(excel_file)
+    sheet_names = xls.sheet_names
+    
+    for sheet in sheet_names:
+        df = pd.read_excel(excel_file, sheet_name=sheet)
+        csv_file = f"input/template_data - {sheet}.csv"
+        df.to_csv(csv_file, index=False)
           
 def add_thousands_separator(number):
     integer_part = int(number)
@@ -887,8 +898,7 @@ def generate_qr_code_url(url):
     return url
 
 def get_drop_number(index, total_size, N):
-    return (index * N) // total_size + 1
-
+    return (index * int(N)) // total_size + 1
 
 def calculate_estimate_cash_offer(total_value, offer_price):
     if int(total_value*offer_price) < 15000 and offer_price > 0:
@@ -898,6 +908,16 @@ def calculate_estimate_cash_offer(total_value, offer_price):
     """
     Pending the new fields.
     """
+
+def get_random_version(company_name, postcard):
+    available_versions = set()
+    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            if row['Company Name'] == company_name:
+                available_versions.add(row['Version'])
+    postcard.version = random.choice(list(available_versions))
+    return postcard.version
 
 def create_csv_files(postcards_list, client):
     fieldnames = [
@@ -968,6 +988,7 @@ def create_csv_files(postcards_list, client):
         "TARGETED GROUP NAME",
         "targeted_test", # Targeted group message
         "Postcard Name",
+        "Version",
         "seller_full_name",
         "seller_first_name",
         "seller_mailing_add",
@@ -998,6 +1019,7 @@ def create_csv_files(postcards_list, client):
         "text_8",
         "text_9",
         "text_10",
+        "text_11",
         "font_color_1",
         "font_color_2",
         "font_color_3",
@@ -1087,6 +1109,7 @@ def create_csv_files(postcards_list, client):
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group,
                     "targeted_test":                postcard.property_data.targeted_testimonial,
                     "Postcard Name":                "T" + postcard.postcard_number,
+                    "Version":                      get_random_version(client.company_name, postcard),
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
                     "seller_mailing_add":           seller_mailing_add,
@@ -1107,16 +1130,17 @@ def create_csv_files(postcards_list, client):
                     "cred_logo_2":                  postcard.cred_logo_2,
                     "cred_logo_3":                  postcard.cred_logo_3,
                     "cred_logo_4":                  postcard.cred_logo_4,
-                    "text_1":                       get_text_by_postcard_name_1(client.company_name, "T" + postcard.postcard_number),
-                    "text_2":                       get_text_by_postcard_name_2(client.company_name, "T" + postcard.postcard_number),
-                    "text_3":                       get_text_by_postcard_name_3(client.company_name, "T" + postcard.postcard_number),
-                    "text_4":                       get_text_by_postcard_name_4(client.company_name, "T" + postcard.postcard_number),
-                    "text_5":                       get_text_by_postcard_name_5(client.company_name, "T" + postcard.postcard_number),
-                    "text_6":                       get_text_by_postcard_name_6(client.company_name, "T" + postcard.postcard_number),
-                    "text_7":                       get_text_by_postcard_name_7(client.company_name, "T" + postcard.postcard_number),
-                    "text_8":                       get_text_by_postcard_name_8(client.company_name, "T" + postcard.postcard_number),
-                    "text_9":                       get_text_by_postcard_name_9(client.company_name, "T" + postcard.postcard_number),
-                    "text_10":                      get_text_by_postcard_name_10(client.company_name, "T" + postcard.postcard_number),
+                    "text_1":                       get_text_by_postcard_name(client.company_name, postcard, 1),
+                    "text_2":                       get_text_by_postcard_name(client.company_name, postcard, 2),
+                    "text_3":                       get_text_by_postcard_name(client.company_name, postcard, 3),
+                    "text_4":                       get_text_by_postcard_name(client.company_name, postcard, 4),
+                    "text_5":                       get_text_by_postcard_name(client.company_name, postcard, 5),
+                    "text_6":                       get_text_by_postcard_name(client.company_name, postcard, 6),
+                    "text_7":                       get_text_by_postcard_name(client.company_name, postcard, 7),
+                    "text_8":                       get_text_by_postcard_name(client.company_name, postcard, 8),
+                    "text_9":                       get_text_by_postcard_name(client.company_name, postcard, 9),
+                    "text_10":                      get_text_by_postcard_name(client.company_name, postcard, 10),
+                    "text_11":                      get_text_by_postcard_name(client.company_name, postcard, 11),
                     "font_color_1":                 postcard.font_color_1,
                     "font_color_2":                 postcard.font_color_2,
                     "font_color_3":                 postcard.font_color_3,
@@ -1195,7 +1219,7 @@ def create_csv_files(postcards_list, client):
                     "targeted_message_3":           postcard.property_data.targeted_message_3,
                     "targeted_message_4":           postcard.property_data.targeted_message_4,
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group                })
-        print("DropSize: ", count_drop_size)
+        print("\tDropSize: ", count_drop_size)
         
     if client.test_percentage != 100:
         df = pd.read_csv("results/" + client.company_name + "/FULL-" +client.company_name + ".csv")
@@ -1239,95 +1263,24 @@ def checking_test_percentage(client):
     else:
         return False
 
-def get_text_by_postcard_name_1(company_name, postcard_name):
+def get_text_by_postcard_name(company_name, postcard, text_number):
     with open(INPUT_CLIENTS_TEXTS, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_1"]
-    return None 
-
-def get_text_by_postcard_name_2(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_2"]
-    return None  
-
-def get_text_by_postcard_name_3(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_3"]
-    return None 
-
-def get_text_by_postcard_name_4(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_4"]
-    return None 
-
-def get_text_by_postcard_name_5(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_5"]
-    return None 
-
-def get_text_by_postcard_name_6(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_6"]
-    return None 
-
-def get_text_by_postcard_name_7(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_7"]
-    return None 
-
-def get_text_by_postcard_name_8(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_8"]
-    return None 
-
-def get_text_by_postcard_name_9(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_9"]
-    return None 
-
-def get_text_by_postcard_name_10(company_name, postcard_name):
-    with open(INPUT_CLIENTS_TEXTS, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == postcard_name:
-                return row["text_10"]
-    return None 
+            if row['Company Name'] == company_name and row['Postcard Name'] == "T" + postcard.postcard_number and postcard.version == row['Version']:
+                return row[f"text_{text_number}"]
+    return None
 
 if __name__ == "__main__":
+    excel_to_csv_start(INPUT_FILE)
     # Read clients' data from the specified CSV file
     clients = read_clients_data(INPUT_CLIENTS_DATA)
     # Iterate over each client
     for client in clients:
-        print("Client:",client.company_name)
-        print("\tChecking test amount:\t", client.test_percentage, "%" )
-        print("\tChecking offer price:\t", int(client.offer_price*100), "%" )
         if find_marketingList(client.company_name):
+            print("Client:",client.company_name)
+            print("\tChecking test amount:\t", client.test_percentage, "%" )
+            print("\tChecking offer price:\t", int(client.offer_price*100), "%" )  
             create_client_folder(client)
             postcards_list = list()
             # Add the marketing list data to the client instance by reading the CSV file
@@ -1351,10 +1304,13 @@ if __name__ == "__main__":
                 newPostcardTemplate.assign_bg_image(client)
                 newPostcardTemplate.assign_google_street_view()
                 postcards_list.append(newPostcardTemplate) 
-            create_csv_files(postcards_list, client)   
+            create_csv_files(postcards_list, client) 
             print("\tCompleted\n")  
         else:
-            print("\tPass\n")         
-               
-# Falta agregar una funcion que tome el test_percentage de un cliente
-# y asigne la propiedad a un postcard con nuestro template o no, y cree otro archivo.
+            pass
+            # print("\tPass\n")         
+  
+  
+
+
+# Example usage
