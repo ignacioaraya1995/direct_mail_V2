@@ -7,8 +7,7 @@ import os
 import sys
 import pandas as pd
 
-INPUT_FILE                  = 'template_data.xlsx'
-
+INPUT_FILE                  = 'input/template_data.xlsx'
 INPUT_CLIENTS_DATA          = 'input/template_data - clients_data.csv'
 INPUT_COLORS_RULES          = 'input/template_data - color_rules.csv'
 INPUT_POSTCARD_RULES        = 'input/template_data - postcard_sequence.csv'
@@ -487,7 +486,7 @@ def read_clients_data(file_name):
                 ],
                 row['What is your current customer demographic?'],
                 row['How many postcards would you like to send?'],
-                int(row['What % of your list would you like to test?']),
+                int(float(row['What % of your list would you like to test?'])),
                 row['When will be your next Direct Mail drop?'],
                 row['What is your postcard size preference?'],
                 row['Have you been featured in TV?'],
@@ -653,175 +652,10 @@ def get_template_for_property(property_data):
         if (
             rule["Group Name"]                  == property_data.seller_avatar_group
             and str(rule["Sequence Step"])      == str(sequence_step)
-        ):
-            #Tests
-            if (
-                rule["Group Name"] == "Owner Occupied" 
-                and str(rule["Sequence Step"])  == "1"
-                and str(rule["Template Number"]) != "4"
-                ):
-                print("\t\t\tError rule -> 1")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "55+ ( Senior )" 
-                and str(rule["Sequence Step"])  == "1"
-                and str(rule["Template Number"]) != "3"
-                ):
-                print("\t\t\tError rule -> 2")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Absentee" 
-                and str(rule["Sequence Step"])  == "1"
-                and str(rule["Template Number"]) != "2"
-                ):
-                print("\t\t\tError rule -> 3")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Financial" 
-                and str(rule["Sequence Step"])  == "1"
-                and str(rule["Template Number"]) != "4"
-                ):
-                print("\t\t\tError rule -> 4")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Probate/Estate" 
-                and str(rule["Sequence Step"])  == "1"
-                and str(rule["Template Number"]) != "3"
-                ):
-                print("\t\t\tError rule -> 5")
-                sys.exit(1)
-            
-            ###
-            
-            if (
-                rule["Group Name"] == "Owner Occupied" 
-                and str(rule["Sequence Step"])  == "2"
-                and str(rule["Template Number"]) != "2"
-                ):
-                print("\t\t\tError rule -> 6")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "55+ ( Senior )" 
-                and str(rule["Sequence Step"])  == "2"
-                and str(rule["Template Number"]) != "4"
-                ):
-                print("\t\t\tError rule -> 7")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Absentee" 
-                and str(rule["Sequence Step"])  == "2"
-                and str(rule["Template Number"]) != "3"
-                ):
-                print("\t\t\tError rule -> 8")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Financial" 
-                and str(rule["Sequence Step"])  == "2"
-                and str(rule["Template Number"]) != "1"
-                ):
-                print("\t\t\tError rule -> 9")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Probate/Estate" 
-                and str(rule["Sequence Step"])  == "2"
-                and str(rule["Template Number"]) != "4"
-                ):
-                print("\t\t\tError rule -> 10")
-                sys.exit(1)
-            
-            ###
-            
-            if (
-                rule["Group Name"] == "Owner Occupied" 
-                and str(rule["Sequence Step"])  == "3"
-                and str(rule["Template Number"]) != "3"
-                ):
-                print("\t\t\tError rule -> 11")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "55+ ( Senior )" 
-                and str(rule["Sequence Step"])  == "3"
-                and str(rule["Template Number"]) != "2"
-                ):
-                print("\t\t\tError rule -> 12")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Absentee" 
-                and str(rule["Sequence Step"])  == "3"
-                and str(rule["Template Number"]) != "1"
-                ):
-                print("\t\t\tError rule -> 13")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Financial" 
-                and str(rule["Sequence Step"])  == "3"
-                and str(rule["Template Number"]) != "2"
-                ):
-                print("\t\t\tError rule -> 14")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Probate/Estate" 
-                and str(rule["Sequence Step"])  == "3"
-                and str(rule["Template Number"]) != "2"
-                ):
-                print("\t\t\tError rule -> 15")
-                sys.exit(1)
-                
-        ###
-            
-            if (
-                rule["Group Name"] == "Owner Occupied" 
-                and str(rule["Sequence Step"])  == "4"
-                and str(rule["Template Number"]) != "1"
-                ):
-                print("\t\t\tError rule -> 16")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "55+ ( Senior )" 
-                and str(rule["Sequence Step"])  == "4"
-                and str(rule["Template Number"]) != "1"
-                ):
-                print("\t\t\tError rule -> 17")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Absentee" 
-                and str(rule["Sequence Step"])  == "4"
-                and str(rule["Template Number"]) != "4"
-                ):
-                print("\t\t\tError rule -> 18")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Financial" 
-                and str(rule["Sequence Step"])  == "4"
-                and str(rule["Template Number"]) != "3"
-                ):
-                print("\t\t\tError rule -> 19")
-                sys.exit(1)
-            
-            if (
-                rule["Group Name"] == "Probate/Estate" 
-                and str(rule["Sequence Step"])  == "4"
-                and str(rule["Template Number"]) != "1"
-                ):
-                print("\t\t\tError rule -> 20")
-                sys.exit(1)
-                               
+        ):              
             return str(rule["Template Name"]), str(rule["Template Number"]), rule["Postcard Gender"]
+        
+    
     print("[ERROR] Template not found: ",)
     return None, None
 
@@ -1252,6 +1086,14 @@ def find_marketingList(company_name):
         if file_name.endswith(".csv") and file_name[:-4] == company_name:
             file_path = os.path.join(marketing_list_folder, file_name)
             return file_path
+        elif file_name.endswith(".xlsx") and file_name[:-5] == company_name:
+            file_path = os.path.join(marketing_list_folder, file_name)
+            # Read Excel file
+            df = pd.read_excel(file_path)
+            # Save as CSV
+            csv_file_path = os.path.join(marketing_list_folder, f"{company_name}.csv")
+            df.to_csv(csv_file_path, index=False)
+            return csv_file_path
     return False
 
 def checking_test_percentage(client):
@@ -1270,6 +1112,12 @@ def get_text_by_postcard_name(company_name, postcard, text_number):
             if row['Company Name'] == company_name and row['Postcard Name'] == "T" + postcard.postcard_number and postcard.version == row['Version']:
                 return row[f"text_{text_number}"]
     return None
+
+def delete_csv_files(folder_path):
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith(".csv"):
+            file_path = os.path.join(folder_path, file_name)
+            os.remove(file_path)
 
 if __name__ == "__main__":
     excel_to_csv_start(INPUT_FILE)
@@ -1308,9 +1156,7 @@ if __name__ == "__main__":
             print("\tCompleted\n")  
         else:
             pass
+    delete_csv_files("input/marketingLists")
+    delete_csv_files("input")
             # print("\tPass\n")         
   
-  
-
-
-# Example usage
