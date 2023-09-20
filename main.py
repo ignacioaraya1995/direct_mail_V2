@@ -735,13 +735,12 @@ def get_drop_number(index, total_size, N):
     return (index * int(N)) // total_size + 1
 
 def calculate_estimate_cash_offer(total_value, offer_price):
-    if int(total_value*offer_price) < 15000 and offer_price > 0:
+    offer = int(total_value) * offer_price
+    if offer < 15000 and offer_price > 0:
         return "-"
     else:
-        return str("$" + str(int(total_value*offer_price)))
-    """
-    Pending the new fields.
-    """
+        rounded_offer = round(offer, -2)  # Round to the nearest hundredth
+        return str("$" + str(int(rounded_offer))) 
 
 def get_random_version(company_name, postcard):
     available_versions = set()
@@ -964,8 +963,8 @@ def create_csv_files(postcards_list, client):
                     "cred_logo_2":                  postcard.cred_logo_2,
                     "cred_logo_3":                  postcard.cred_logo_3,
                     "cred_logo_4":                  postcard.cred_logo_4,
-                    "text_1":                       get_text_by_postcard_name(client.company_name, postcard, 1),
-                    "text_2":                       get_text_by_postcard_name(client.company_name, postcard, 2),
+                    "text_1":                       get_text_by_postcard_name(client.company_name, postcard, 1, estimate_cash_offer),
+                    "text_2":                       get_text_by_postcard_name(client.company_name, postcard, 2, estimate_cash_offer),
                     "text_3":                       get_text_by_postcard_name(client.company_name, postcard, 3),
                     "text_4":                       get_text_by_postcard_name(client.company_name, postcard, 4),
                     "text_5":                       get_text_by_postcard_name(client.company_name, postcard, 5),
@@ -1105,7 +1104,9 @@ def checking_test_percentage(client):
     else:
         return False
 
-def get_text_by_postcard_name(company_name, postcard, text_number):
+def get_text_by_postcard_name(company_name, postcard, text_number, estimate_cash_offer = 1):
+    if estimate_cash_offer == "-":
+        return ""
     with open(INPUT_CLIENTS_TEXTS, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
@@ -1156,7 +1157,7 @@ if __name__ == "__main__":
             print("\tCompleted\n")  
         else:
             pass
-    delete_csv_files("input/marketingLists")
+    # delete_csv_files("input/marketingLists")
     delete_csv_files("input")
             # print("\tPass\n")         
   
