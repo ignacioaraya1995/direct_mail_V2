@@ -6,6 +6,7 @@ import random
 import os
 import sys
 import pandas as pd
+from datetime import datetime, timedelta
 
 INPUT_FILE                  = 'input/template_data.xlsx'
 INPUT_CLIENTS_DATA          = 'input/template_data - clients_data.csv'
@@ -165,7 +166,7 @@ class PostcardsList:
         self.company_mailing_zip =      ""
         self.company_website =          client.website
         self.investor_full_name =       client.agent_name
-        self.testimonial_name =         generate_full_name(self.postcard_gender)
+        self.testimonial_name =         generate_full_name(self.postcard_gender, self.property_data)
         self.qr_code_url =              generate_qr_code_url(client.website_link)
 
     def assign_owner_information(self, propertyData, client):
@@ -290,7 +291,7 @@ class PropertyData:
         self.targeted_message_4 = targeted_message_4
 
 class Client:
-    def __init__(self, client_id, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results):
+    def __init__(self, client_id, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, range_offer, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results):
         self.client_id = client_id
         self.company_name = company_name
         self.contact_name = contact_name
@@ -302,6 +303,7 @@ class Client:
         self.demographic = demographic
         self.postcard_quantity = postcard_quantity
         self.test_percentage = test_percentage
+        self.range_offer = range_offer
         self.drop_date = drop_date
         self.postcard_size = postcard_size 
         self.featured_in_tv = featured_in_tv
@@ -487,6 +489,7 @@ def read_clients_data(file_name):
                 row['What is your current customer demographic?'],
                 row['How many postcards would you like to send?'],
                 int(float(row['What % of your list would you like to test?'])),
+                row['range_offer'],
                 row['When will be your next Direct Mail drop?'],
                 row['What is your postcard size preference?'],
                 row['Have you been featured in TV?'],
@@ -674,7 +677,7 @@ def csv_to_json(csv_file):
     
     return "workingFiles/"+csv_file.replace(".csv", ".json").replace("input/", "")
 
-def generate_full_name(postcard_gender):
+def generate_full_name(postcard_gender, property_data):
     # List of common American male first names
         
     male_first_names = [
@@ -716,9 +719,9 @@ def generate_full_name(postcard_gender):
 
     # Generate a random last name
     last_name = random.choice(last_names)
-
+    area = f"({property_data.city}, {property_data.state})"
     # Return the generated full name
-    return f"{first_name} {last_name[0]}."
+    return f"{first_name} {last_name[0]}. {area}"
 
 def generate_qr_code_url(url):
     base_url = "https://api.qrserver.com/v1/create-qr-code/"
@@ -734,14 +737,20 @@ def generate_qr_code_url(url):
 def get_drop_number(index, total_size, N):
     return (index * int(N)) // total_size + 1
 
-def calculate_estimate_cash_offer(total_value, offer_price):
-    offer = int(total_value) * offer_price
-    if offer < 15000 and offer_price > 0:
-        return "-"
-    else:
-        rounded_offer = round(offer, -2)  # Round to the nearest hundredth
-        return str("$" + str(int(rounded_offer))) 
+def calculate_estimate_cash_offer(client, total_value, offer_price):
+    if client.range_offer == "True":
+        low_estimated_offer     = round(total_value * 0.8, -2) 
+        high_estimated_offer    = round(total_value * 1.2, -2) 
+        return str("$" + str(add_thousands_separator(low_estimated_offer)) + " - " + "$" + str(add_thousands_separator(high_estimated_offer)))
 
+    else:
+        offer = int(total_value) * offer_price
+        if offer < 15000 and offer_price > 0:
+            return "TBD"
+        else:
+            rounded_offer = round(offer, -2)  # Round to the nearest hundredth
+            return str("$" + str(int(rounded_offer))) 
+                
 def get_random_version(company_name, postcard):
     available_versions = set()
     with open(INPUT_CLIENTS_TEXTS, 'r') as file:
@@ -757,6 +766,8 @@ def create_csv_files(postcards_list, client):
         "client_id",
         "client_name",
         "campaign_name",
+        "drop_date",
+        "exp_date",
         "DM CASE STUDY",
         "FOLIO",
         "OWNER FULL NAME",
@@ -871,13 +882,15 @@ def create_csv_files(postcards_list, client):
         for i, postcard in enumerate(postcards_list):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
-            estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)
+            estimate_cash_offer = calculate_estimate_cash_offer(client, postcard.property_data.total_value, client.offer_price)
             if checking_test_percentage(client):  
                 count_drop_size += 1 
                 writer.writerow({
                     "client_id":                    client.client_id,
                     "client_name":                  client.company_name,
                     "campaign_name":                client.campaign_name,
+                    "drop_date":                    client.drop_date,
+                    "exp_date":                     add_30_days(client.drop_date),
                     "DM CASE STUDY":                True,
                     "FOLIO":                        postcard.property_data.folio,
                     "OWNER FULL NAME":              postcard.property_data.owner_full_name,
@@ -990,6 +1003,8 @@ def create_csv_files(postcards_list, client):
                     "client_id":                    client.client_id,
                     "client_name":                  client.company_name,
                     "campaign_name":                False,
+                    "drop_date":                    False,
+                    "exp_date":                     False, 
                     "DM CASE STUDY":                False,
                     "FOLIO":                        postcard.property_data.folio,
                     "OWNER FULL NAME":              postcard.property_data.owner_full_name,
@@ -1120,6 +1135,12 @@ def delete_csv_files(folder_path):
             file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
 
+def add_30_days(drop_date: str) -> str:
+    drop_date_obj = datetime.strptime(drop_date, "%Y-%m-%d %H:%M:%S")
+    exp_date_obj = drop_date_obj + timedelta(days=30)
+    exp_date = exp_date_obj.strftime("%Y-%m-%d %H:%M:%S")
+    return exp_date
+
 if __name__ == "__main__":
     excel_to_csv_start(INPUT_FILE)
     # Read clients' data from the specified CSV file
@@ -1143,6 +1164,9 @@ if __name__ == "__main__":
             i = 0
             for property_data in client.marketing_list:
                 # Determine the template to use for each property data
+                print(client.drop_date)
+                # print(property_data.action_plans, property_data.score)
+                # we want postcards:
                 postcard_name, postcard_number, postcard_gender = get_template_for_property(property_data)
                 newPostcardTemplate = PostcardsList(property_data, postcard_name, postcard_number, postcard_gender)
                 newPostcardTemplate.assign_company_information(client)

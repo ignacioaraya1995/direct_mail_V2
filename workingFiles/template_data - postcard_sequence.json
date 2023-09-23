@@ -1,43 +1,43 @@
 [
     {
-        "Group Number": "2",
-        "Sequence Step": "2",
-        "Group Name": "Financial",
-        "Template Number": "1",
-        "Template Name": "Driver",
-        "Postcard Gender": "Male"
-    },
-    {
-        "Group Number": "3",
-        "Sequence Step": "3",
-        "Group Name": "Absentee",
-        "Template Number": "1",
-        "Template Name": "Driver",
-        "Postcard Gender": "Male"
-    },
-    {
         "Group Number": "4",
-        "Sequence Step": "4",
+        "Sequence Step": "1",
         "Group Name": "55+ ( Senior )",
-        "Template Number": "1",
-        "Template Name": "Driver",
+        "Template Number": "3",
+        "Template Name": "Amiable",
         "Postcard Gender": "Female"
-    },
-    {
-        "Group Number": "5",
-        "Sequence Step": "4",
-        "Group Name": "Owner Occupied",
-        "Template Number": "1",
-        "Template Name": "Driver",
-        "Postcard Gender": "Male"
     },
     {
         "Group Number": "1",
-        "Sequence Step": "4",
+        "Sequence Step": "1",
         "Group Name": "Probate/Estate",
-        "Template Number": "1",
-        "Template Name": "Driver",
+        "Template Number": "3",
+        "Template Name": "Amiable",
         "Postcard Gender": "Female"
+    },
+    {
+        "Group Number": "3",
+        "Sequence Step": "2",
+        "Group Name": "Absentee",
+        "Template Number": "3",
+        "Template Name": "Amiable",
+        "Postcard Gender": "Male"
+    },
+    {
+        "Group Number": "5",
+        "Sequence Step": "3",
+        "Group Name": "Owner Occupied",
+        "Template Number": "3",
+        "Template Name": "Amiable",
+        "Postcard Gender": "Male"
+    },
+    {
+        "Group Number": "2",
+        "Sequence Step": "4",
+        "Group Name": "Financial",
+        "Template Number": "3",
+        "Template Name": "Amiable",
+        "Postcard Gender": "Male"
     },
     {
         "Group Number": "3",
@@ -80,44 +80,44 @@
         "Postcard Gender": "Female"
     },
     {
-        "Group Number": "4",
-        "Sequence Step": "1",
-        "Group Name": "55+ ( Senior )",
-        "Template Number": "3",
-        "Template Name": "Amiable",
-        "Postcard Gender": "Female"
-    },
-    {
-        "Group Number": "1",
-        "Sequence Step": "1",
-        "Group Name": "Probate/Estate",
-        "Template Number": "3",
-        "Template Name": "Amiable",
-        "Postcard Gender": "Female"
+        "Group Number": "2",
+        "Sequence Step": "2",
+        "Group Name": "Financial",
+        "Template Number": "1",
+        "Template Name": "Driver",
+        "Postcard Gender": "Male"
     },
     {
         "Group Number": "3",
-        "Sequence Step": "2",
+        "Sequence Step": "3",
         "Group Name": "Absentee",
-        "Template Number": "3",
-        "Template Name": "Amiable",
+        "Template Number": "1",
+        "Template Name": "Driver",
         "Postcard Gender": "Male"
+    },
+    {
+        "Group Number": "4",
+        "Sequence Step": "4",
+        "Group Name": "55+ ( Senior )",
+        "Template Number": "1",
+        "Template Name": "Driver",
+        "Postcard Gender": "Female"
     },
     {
         "Group Number": "5",
-        "Sequence Step": "3",
+        "Sequence Step": "4",
         "Group Name": "Owner Occupied",
-        "Template Number": "3",
-        "Template Name": "Amiable",
+        "Template Number": "1",
+        "Template Name": "Driver",
         "Postcard Gender": "Male"
     },
     {
-        "Group Number": "2",
+        "Group Number": "1",
         "Sequence Step": "4",
-        "Group Name": "Financial",
-        "Template Number": "3",
-        "Template Name": "Amiable",
-        "Postcard Gender": "Male"
+        "Group Name": "Probate/Estate",
+        "Template Number": "1",
+        "Template Name": "Driver",
+        "Postcard Gender": "Female"
     },
     {
         "Group Number": "2",
