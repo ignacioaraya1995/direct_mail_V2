@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 INPUT_FILE                  = 'input/template_data.xlsx'
 INPUT_CLIENTS_DATA          = 'input/template_data - clients_data.csv'
 INPUT_COLORS_RULES          = 'input/template_data - color_rules.csv'
-INPUT_POSTCARD_RULES        = 'input/template_data - postcard_sequence.csv'
+INPUT_MAIL_RULES        = 'input/template_data - mail_sequence.csv'
 INPUT_CLIENTS_LOGOS         = 'input/template_data - clients_logos.csv'
 INPUT_CLIENTS_ADDRESS       = 'input/template_data - clients_address.csv'
 INPUT_CLIENTS_PHONES        = 'input/template_data - clients_phones.csv'
@@ -304,7 +304,7 @@ class Client:
         self.postcard_quantity = postcard_quantity
         self.test_percentage = test_percentage
         self.range_offer = range_offer
-        self.drop_date = drop_date
+        self.drop_date = ""
         self.postcard_size = postcard_size 
         self.featured_in_tv = featured_in_tv
         self.bbb_accreditation = bbb_accreditation
@@ -433,6 +433,7 @@ class Client:
                 if row['client_name'] == self.company_name:
                     self.campaign_name = row['campaign_name']
                     self.drop_nums = row['drop_nums']
+                    self.drop_date = row['drop_date']
                     break
             else:
                 self.campaign_name = "Not found"
@@ -650,13 +651,13 @@ def get_template_for_property(property_data):
         sequence_step = (property_data.num_dm % 4) + 1
     
     property_data.sequence_step = str(sequence_step)
-    rules_data = load_postcard_rules(csv_to_json(INPUT_POSTCARD_RULES))
+    rules_data = load_postcard_rules(csv_to_json(INPUT_MAIL_RULES))
     for rule in rules_data:       
         if (
             rule["Group Name"]                  == property_data.seller_avatar_group
             and str(rule["Sequence Step"])      == str(sequence_step)
         ):              
-            return str(rule["Template Name"]), str(rule["Template Number"]), rule["Postcard Gender"]
+            return str(rule["Template Name"]), str(rule["Template Number"]), rule["Gender"]
         
     
     print("[ERROR] Template not found: ",)
@@ -1136,7 +1137,14 @@ def delete_csv_files(folder_path):
             os.remove(file_path)
 
 def add_30_days(drop_date: str) -> str:
-    drop_date_obj = datetime.strptime(drop_date, "%Y-%m-%d %H:%M:%S")
+    try:
+        drop_date_obj = datetime.strptime(drop_date, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        try:
+            drop_date_obj = datetime.strptime(drop_date, "%Y-%m-%d")
+        except ValueError:
+            return "Invalid date format"
+
     exp_date_obj = drop_date_obj + timedelta(days=30)
     exp_date = exp_date_obj.strftime("%Y-%m-%d %H:%M:%S")
     return exp_date
@@ -1164,7 +1172,6 @@ if __name__ == "__main__":
             i = 0
             for property_data in client.marketing_list:
                 # Determine the template to use for each property data
-                print(client.drop_date)
                 # print(property_data.action_plans, property_data.score)
                 # we want postcards:
                 postcard_name, postcard_number, postcard_gender = get_template_for_property(property_data)
