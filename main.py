@@ -1,5 +1,6 @@
 import csv
 import re
+from fuzzywuzzy import fuzz
 import sys
 import json
 import random
@@ -7,6 +8,31 @@ import os
 import sys
 import pandas as pd
 from datetime import datetime, timedelta
+
+common_first_names = [
+    "James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Charles",
+    "Patricia", "Jennifer", "Linda", "Barbara", "Elizabeth", "Laura", "Jessica", "Sarah", "Karen", "Nancy",
+    "Matthew", "Daniel", "Paul", "Mark", "Donald", "George", "Kenneth", "Steven", "Edward", "Brian",
+    "Ronald", "Anthony", "Kevin", "Jason", "Jeff", "Frank", "Timothy", "Gary", "Ryan", "Nicholas",
+    "Eric", "Stephen", "Andrew", "Raymond", "Gregory", "Joshua", "Jerry", "Dennis", "Walter", "Patrick",
+    "Peter", "Harold", "Douglas", "Henry", "Carl", "Arthur", "Roger", "Keith", "Jeremy", "Terry",
+    "Lawrence", "Sean", "Christian", "Albert", "Joe", "Ethan", "Austin", "Jesse", "Willie", "Billy",
+    "Bryan", "Bruce", "Ralph", "Roy", "Jordan", "Eugene", "Wayne", "Alan", "Juan", "Louis", "Russell",
+    "Gabriel", "Randy", "Philip", "Harry", "Vincent", "Noah", "Bobby", "Johnny", "Logan", "Virginia"
+]
+
+common_last_names = [
+    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
+    "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Lee",
+    "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker",
+    "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green",
+    "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Gomez",
+    "Phillips", "Evans", "Turner", "Diaz", "Parker", "Cruz", "Edwards", "Collins", "Reyes", "Stewart",
+    "Morris", "Morales", "Murphy", "Cook", "Rogers", "Gutierrez", "Ortiz", "Morgan", "Cooper", "Peterson",
+    "Bailey", "Reed", "Kelly", "Howard", "Ramos", "Kim", "Cox", "Ward", "Richardson", "Watson", "Brooks",
+    "Chavez", "Wood", "James", "Bennett", "Gray", "Mendoza", "Ruiz", "Hughes", "Price", "Alvarez",
+    "Castillo", "Sanders", "Patel", "Myers", "Long", "Ross", "Foster", "Jimenez"
+]
 
 INPUT_FILE                  = 'input/template_data.xlsx'
 INPUT_CLIENTS_DATA          = 'input/template_data - clients_data.csv'
@@ -227,9 +253,9 @@ class PropertyData:
                  main_distress_3, main_distress_4, targeted_message_1, targeted_message_2, targeted_message_3,
                  targeted_message_4):
         self.folio = folio
-        self.owner_full_name = owner_full_name
-        self.owner_first_name = owner_first_name
-        self.owner_last_name = owner_last_name
+        self.owner_full_name = owner_full_name.lower().title().replace('Llc', 'LLC')
+        self.owner_first_name = owner_first_name.lower().title().replace('Llc', 'LLC')
+        self.owner_last_name = owner_last_name.lower().title().replace('Llc', 'LLC')
         self.address = address
         self.city = city
         self.state = state
@@ -289,9 +315,71 @@ class PropertyData:
         self.targeted_message_2 = targeted_message_2
         self.targeted_message_3 = targeted_message_3
         self.targeted_message_4 = targeted_message_4
+        self.clean_owner_info()
+        self.check_golden_addresses()
+
+    def check_golden_addresses(self):
+        if self.golden_address != "" and self.golden_address != self.mailing_address:
+            self.mailing_address    = self.golden_address
+            self.mailing_city       = self.golden_city
+            self.mailing_state      = self.golden_state
+            self.mailing_zip        = self.golden_zip_code
+
+    def _remove_single_letters_and_titles(self, full_name):
+        return ' '.join(word for word in full_name.split() if len(word) > 1 and word.lower() not in ['jr', 'sr'])
+
+    def _split_name(self, full_name):
+        cleaned_name = re.sub(r'[^\w\s]', '', full_name)
+        name_parts = cleaned_name.split()
+        return ' '.join(name_parts[:-1]), name_parts[-1] if len(name_parts) > 1 else ''
+
+    def _is_valid_name(self, name):
+        return name and bool(re.match('^[a-zA-Z\s]+$', name)) and len(name) > 1
+
+    def _correct_name_order(self, first_name, last_name):
+        # If either name part is more common as a first name, swap them
+        if first_name.title() in common_first_names and last_name.title() not in common_first_names:
+            return first_name, last_name
+        elif last_name.title() in common_first_names and first_name.title() not in common_first_names:
+            return last_name, first_name
+        return first_name, last_name
+
+    def clean_owner_info(self):
+        self.owner_full_name = str(self.owner_full_name).strip(" ,-.")
+        
+        # If "llc" is in the name, convert it to "LLC"
+        if 'llc' in self.owner_full_name.lower():
+            self.owner_full_name = self.owner_full_name.lower().title().replace('Llc', 'LLC')
+            self.owner_first_name = self.owner_full_name.lower().title().replace('Llc', 'LLC')
+            self.owner_last_name = self.owner_full_name.lower().title().replace('Llc', 'LLC')
+            return
+
+        # Remove single-letter words (like middle initials) and 'Jr' and 'Sr' from full_name
+        cleaned_full_name = self._remove_single_letters_and_titles(self.owner_full_name)
+        first_name_candidate, last_name_candidate = self._split_name(cleaned_full_name)
+        
+        # If the pre-existing first name is not valid, use the split first name candidate
+        if not self._is_valid_name(self.owner_first_name):
+            if self._is_valid_name(first_name_candidate):
+                self.owner_first_name = first_name_candidate
+            else:
+                self.owner_first_name = self.owner_full_name
+        
+        # Reset last_name to avoid repetition when first_name gets updated
+        self.owner_last_name = None
+
+        # If the pre-existing last name is not valid, use the split last name candidate
+        if not self._is_valid_name(self.owner_last_name):
+            if self._is_valid_name(last_name_candidate):
+                self.owner_last_name = last_name_candidate
+            else:
+                self.owner_last_name = self.owner_full_name
+
+        # Correct the name order using common first names list
+        self.owner_first_name, self.owner_last_name = self._correct_name_order(self.owner_first_name, self.owner_last_name)
 
 class Client:
-    def __init__(self, client_id, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, range_offer, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results):
+    def __init__(self, client_id, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results):
         self.client_id = client_id
         self.company_name = company_name
         self.contact_name = contact_name
@@ -303,7 +391,6 @@ class Client:
         self.demographic = demographic
         self.postcard_quantity = postcard_quantity
         self.test_percentage = test_percentage
-        self.range_offer = range_offer
         self.drop_date = ""
         self.postcard_size = postcard_size 
         self.featured_in_tv = featured_in_tv
@@ -436,7 +523,7 @@ class Client:
                     self.drop_date = row['drop_date']
                     break
             else:
-                self.campaign_name = "Not found"
+                self.campaign_name = ""
                 self.drop_nums = "Not found"
     
     def get_offer_price(self):
@@ -444,7 +531,7 @@ class Client:
             reader = csv.DictReader(file)
             for row in reader:
                 if row['Company Name'] == self.company_name:
-                    self.offer_price = int(row['Price Offer Rate'])/100
+                    self.offer_price = row['Price Offer Rate']
                     break
             else:
                 self.offer_price = .85 
@@ -490,7 +577,6 @@ def read_clients_data(file_name):
                 row['What is your current customer demographic?'],
                 row['How many postcards would you like to send?'],
                 int(float(row['What % of your list would you like to test?'])),
-                row['range_offer'],
                 row['When will be your next Direct Mail drop?'],
                 row['What is your postcard size preference?'],
                 row['Have you been featured in TV?'],
@@ -736,21 +822,27 @@ def generate_qr_code_url(url):
     return url
 
 def get_drop_number(index, total_size, N):
-    return (index * int(N)) // total_size + 1
+    try:
+        return (index * int(N)) // total_size + 1
+    except ValueError:
+        N = 4
+        return (index * int(N)) // total_size + 1
 
-def calculate_estimate_cash_offer(client, total_value, offer_price):
-    if client.range_offer == "True":
-        low_estimated_offer     = round(total_value * 0.8, -2) 
-        high_estimated_offer    = round(total_value * 1.2, -2) 
-        return str("$" + str(add_thousands_separator(low_estimated_offer)) + " - " + "$" + str(add_thousands_separator(high_estimated_offer)))
-
+def calculate_estimate_cash_offer(total_value, offer_price):    
+    # Check if the offer rate is a range
+    if '-' in offer_price:
+        low, high = map(float, offer_price.split(' - '))
+        low_offer = round(total_value * low, -2)
+        high_offer = round(total_value * high, -2)
+        return f"${add_thousands_separator(low_offer)} - ${add_thousands_separator(high_offer)}"
     else:
-        offer = int(total_value) * offer_price
-        if offer < 15000 and offer_price > 0:
+        offer = int(total_value) * (float(offer_price) / 100)
+        if offer < 15000 and float(offer_price) > 0:
             return "TBD"
         else:
             rounded_offer = round(offer, -2)  # Round to the nearest hundredth
-            return str("$" + str(int(rounded_offer))) 
+            return f"${add_thousands_separator(int(rounded_offer))}"
+
                 
 def get_random_version(company_name, postcard):
     available_versions = set()
@@ -833,7 +925,7 @@ def create_csv_files(postcards_list, client):
         "TARGETED GROUP NAME",
         "targeted_test", # Targeted group message
         "Postcard Name",
-        "Version",
+        # "Version",
         "seller_full_name",
         "seller_first_name",
         "seller_mailing_add",
@@ -883,7 +975,7 @@ def create_csv_files(postcards_list, client):
         for i, postcard in enumerate(postcards_list):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
-            estimate_cash_offer = calculate_estimate_cash_offer(client, postcard.property_data.total_value, client.offer_price)
+            estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)
             if checking_test_percentage(client):  
                 count_drop_size += 1 
                 writer.writerow({
@@ -955,8 +1047,8 @@ def create_csv_files(postcards_list, client):
                     "targeted_message_4":           postcard.property_data.targeted_message_4,
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group,
                     "targeted_test":                postcard.property_data.targeted_testimonial,
-                    "Postcard Name":                "T" + postcard.postcard_number,
-                    "Version":                      get_random_version(client.company_name, postcard),
+                    "Postcard Name":                "T" + postcard.postcard_number + get_random_version(client.company_name, postcard),
+                    # "Version":                      get_random_version(client.company_name, postcard),
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
                     "seller_mailing_add":           seller_mailing_add,
@@ -1143,7 +1235,7 @@ def add_30_days(drop_date: str) -> str:
         try:
             drop_date_obj = datetime.strptime(drop_date, "%Y-%m-%d")
         except ValueError:
-            return "Invalid date format"
+            return ""
 
     exp_date_obj = drop_date_obj + timedelta(days=30)
     exp_date = exp_date_obj.strftime("%Y-%m-%d %H:%M:%S")
@@ -1158,7 +1250,7 @@ if __name__ == "__main__":
         if find_marketingList(client.company_name):
             print("Client:",client.company_name)
             print("\tChecking test amount:\t", client.test_percentage, "%" )
-            print("\tChecking offer price:\t", int(client.offer_price*100), "%" )  
+            print("\tChecking offer price or range:\t", client.offer_price )  
             create_client_folder(client)
             postcards_list = list()
             # Add the marketing list data to the client instance by reading the CSV file
