@@ -9,6 +9,12 @@ import pandas as pd
 import csv
 from vars import *
 
+# Step 1: Read CSV Files Once
+def read_csv_file(file_path):
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file)
+        return [row for row in reader]
+
 def add_thousands_separator(number):
     integer_part = int(number)
     formatted_number = "{:,.0f}".format(integer_part)
@@ -85,7 +91,6 @@ def get_template_for_property(property_data):
     if template_name is not None:
         return template_name, template_number, gender
     print("[ERROR] Template not found")
-    sys.exit(1)
 
 def generate_full_name(postcard_gender, property_data):
     # List of common American male first names

@@ -5,6 +5,9 @@ from PostcardsList import PostcardsList
 from PropertyData import PropertyData
 
 def read_clients_data(file_name):
+    clients_address_data = read_csv_file(INPUT_CLIENTS_ADDRESS)
+    clients_campaign_data = read_csv_file(INPUT_CLIENTS_CAMPAIGN)
+    clients_offer_price_data = read_csv_file(INPUT_CLIENTS_OFFER_PRICE)
     clients = []
     with open(file_name, 'r', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -40,7 +43,10 @@ def read_clients_data(file_name):
                 row['Who is your preferred Direct Mail House?'],
                 row['Upload up to 3 of your most recent postcard designs. Only upload the ones that you have used in the past 12 months.'],
                 row['Any other additional comments'],
-                row['Do you agree to share the results in a monthly basis?']
+                row['Do you agree to share the results in a monthly basis?'],
+                clients_address_data,
+                clients_campaign_data,
+                clients_offer_price_data
             )
             clients.append(client)
     return clients
@@ -154,20 +160,19 @@ def read_marketing_list_csv(file_name):
                                          main_distress_1, main_distress_2, main_distress_3, main_distress_4,
                                          targeted_message_1, targeted_message_2, targeted_message_3, targeted_message_4)
             marketing_list.append(property_data)
+    marketing_list = sorted(marketing_list, key=lambda x: int(x.score), reverse=True)
     return marketing_list
 
-def create_postcard(property_data, client):
+def create_postcard(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data):
     postcard_name, postcard_number, postcard_gender = get_template_for_property(property_data)
-    
-    # sys.exit(0)
     postcard = PostcardsList(property_data, postcard_name, postcard_number, postcard_gender)
     postcard.assign_company_information(client)
     postcard.assign_owner_information(property_data, client)
-    # postcard.assign_colors(client)
-    postcard.assign_logos()
-    # postcard.assign_tracking_number(client)
-    # postcard.assign_bg_image(client)
-    # postcard.assign_google_street_view()
+    postcard.assign_colors(client, colors_rules_data)
+    postcard.assign_logos(clients_logos_data)
+    postcard.assign_tracking_number(client)
+    postcard.assign_bg_image(client, clients_bg_img_data)
+    postcard.assign_google_street_view()
     return postcard
 
 def create_csv_files(postcards_list, client):
@@ -477,7 +482,7 @@ def create_csv_files(postcards_list, client):
                     "targeted_message_3":           postcard.property_data.targeted_message_3,
                     "targeted_message_4":           postcard.property_data.targeted_message_4,
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group                })
-        print("\tDropSize: ", count_drop_size)
+        print("DropSize: ", count_drop_size)
         
     if client.test_percentage != 100:
         df = pd.read_csv("results/" + client.company_name + "/FULL-" +client.company_name + ".csv")
@@ -498,24 +503,24 @@ def delete_csv_files(folder_path):
 if __name__ == "__main__":
     excel_to_csv_start(INPUT_FILE)
     clients = read_clients_data(INPUT_CLIENTS_DATA)
-    
+    colors_rules_data = read_csv_file(INPUT_COLORS_RULES)
+    clients_logos_data = read_csv_file(INPUT_CLIENTS_LOGOS)
+    clients_bg_img_data = read_csv_file(INPUT_CLIENTS_BG_IMG)
+        
     for client in clients:
         if not find_marketingList(client.company_name):
             continue
         
-        print(f"Client: {client.company_name}")
-        print(f"\tTest Amount: {client.test_percentage}%")
-        print(f"\tOffer Price/Range: {client.offer_price}")
-        
+        print(f"Client: {client.company_name}\tTest Amount: {client.test_percentage}%\tOffer Price/Range: {client.offer_price}")     
         create_client_folder(client)
         client.add_marketing_list(read_marketing_list_csv(find_marketingList(client.company_name)))
-        
         postcards_list = [
-            create_postcard(property_data, client) 
+            create_postcard(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data) 
             for property_data in client.marketing_list
         ]
-        postcards_list = []
-        create_csv_files(postcards_list, client) 
+        print("x")
+        create_csv_files(postcards_list, client)
+         
     print("\tCompleted\n")
     delete_csv_files("input")
 

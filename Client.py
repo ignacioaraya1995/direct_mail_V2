@@ -1,8 +1,7 @@
-import csv
-from vars import *
+from functions import *
 
 class Client:
-    def __init__(self, client_id, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results):
+    def __init__(self, client_id, company_name, contact_name, contact_email, contact_phone, mailing_address, website, logo, tracking_numbers, demographic, postcard_quantity, test_percentage, drop_date, postcard_size, featured_in_tv, bbb_accreditation, years_in_business, agent_name, website_link, response_rate, roi, deal_postcards, mail_house, postcard_designs, additional_comments, share_results, clients_address_data, clients_campaign_data, clients_offer_price_data):
         self.client_id = client_id
         self.company_name = company_name
         self.contact_name = contact_name
@@ -28,9 +27,9 @@ class Client:
         self.postcard_designs = postcard_designs
         self.additional_comments = additional_comments
         self.share_results = share_results
-        self.get_client_address()
-        self.get_client_campaign_data()
-        self.get_offer_price()
+        self.get_client_address(clients_address_data)
+        self.get_client_campaign_data(clients_campaign_data)
+        self.get_offer_price(clients_offer_price_data)
         self.text_1 = []
         self.text_2 = []
         self.text_3 = []
@@ -118,46 +117,39 @@ class Client:
 
         print("=== End of Insights ===")
 
-    def get_client_address(self):
-        with open(INPUT_CLIENTS_ADDRESS, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row['Company Name'] == self.company_name:
-                    self.company_mailing_address = row['Company Mailing Address']
-                    self.company_mailing_city = row['Company Mailing City']
-                    self.company_mailing_state = row['Company Mailing State']
-                    self.company_mailing_zip = row['Company Mailing ZIP']
-                    break
-            else:
-                # Handle the case where the company name is not found
-                # Set default values or perform any necessary actions
-                self.company_mailing_address = "Not found"
-                self.company_mailing_city = "Not found"
-                self.company_mailing_state = "Not found"
-                self.company_mailing_zip = "Not found"
+    def get_client_address(self, clients_address_data):
+        for row in clients_address_data:
+            if row['Company Name'] == self.company_name:
+                self.company_mailing_address = row['Company Mailing Address']
+                self.company_mailing_city = row['Company Mailing City']
+                self.company_mailing_state = row['Company Mailing State']
+                self.company_mailing_zip = row['Company Mailing ZIP']
+                break
+        else:
+            # Handle not found
+            self.company_mailing_address = "Not found"
+            self.company_mailing_city = "Not found"
+            self.company_mailing_state = "Not found"
+            self.company_mailing_zip = "Not found"
     
-    def get_client_campaign_data(self):
-        with open(INPUT_CLIENTS_CAMPAIGN, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row['client_name'] == self.company_name:
-                    self.campaign_name = row['campaign_name']
-                    self.drop_nums = row['drop_nums']
-                    self.drop_date = row['drop_date']
-                    break
-            else:
-                self.campaign_name = ""
-                self.drop_nums = "Not found"
+    def get_client_campaign_data(self, clients_campaign_data):
+        for row in clients_campaign_data:
+            if row['client_name'] == self.company_name:
+                self.campaign_name = row['campaign_name']
+                self.drop_nums = row['drop_nums']
+                self.drop_date = row['drop_date']
+                break
+        else:
+            self.campaign_name = ""
+            self.drop_nums = "Not found"
     
-    def get_offer_price(self):
-        with open(INPUT_CLIENTS_OFFER_PRICE, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row['Company Name'] == self.company_name:
-                    self.offer_price = row['Price Offer Rate']
-                    break
-            else:
-                self.offer_price = .85 
+    def get_offer_price(self, clients_offer_price_data):
+        for row in clients_offer_price_data:
+            if row['Company Name'] == self.company_name:
+                self.offer_price = row['Price Offer Rate']
+                break
+        else:
+            self.offer_price = .85
     
     @staticmethod
     def center_text(text, width):

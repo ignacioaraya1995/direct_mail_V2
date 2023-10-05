@@ -1,7 +1,4 @@
-import csv
-from vars import *
 from functions import *
-
 class PostcardsList:
     def __init__(self, 
                  property_data, 
@@ -123,21 +120,6 @@ class PostcardsList:
                f"block_color_1: {self.block_color_1}\n" \
                f"block_color_2: {self.block_color_2}\n" \
      
-    def assign_colors(self, client):
-        """
-        The function assigns colors to different variables based on the company name and postcard number.
-        """
-        with open(INPUT_COLORS_RULES, newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                if row['Company Name'] == self.company_name:
-                    self.font_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_1' else self.font_color_1
-                    self.font_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_2' else self.font_color_2
-                    self.font_color_3 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_3' else self.font_color_3
-                    self.font_color_4 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_4' else self.font_color_4
-                    self.block_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_1' else self.block_color_1
-                    self.block_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_2' else self.block_color_2
-
     def assign_company_information(self, client):
         self.company_name =             client.company_name
         self.company_phone_number =     client.contact_phone
@@ -164,12 +146,18 @@ class PostcardsList:
         self.owner_mailing_zip =        propertyData.mailing_zip
         self.total_value =              add_thousands_separator(propertyData.total_value)
 
-    def assign_logos(self):
-        with open(INPUT_CLIENTS_LOGOS, 'r') as file:
-            reader = csv.DictReader(file)
-            rows = [row for row in reader]
-            
-        for row in rows:
+    def assign_colors(self, client, colors_rules_data):
+        for row in colors_rules_data:
+            if row['Company Name'] == self.company_name:
+                self.font_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_1' else self.font_color_1
+                self.font_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_2' else self.font_color_2
+                self.font_color_3 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_3' else self.font_color_3
+                self.font_color_4 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_4' else self.font_color_4
+                self.block_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_1' else self.block_color_1
+                self.block_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_2' else self.block_color_2
+
+    def assign_logos(self, clients_logos_data):
+        for row in clients_logos_data:
             if row['Company Name'] == self.company_name:
                 if row['Type'].startswith('cred_logo'):
                     logo_number = str(row['Type'].replace("cred_logo_", ""))
@@ -178,20 +166,14 @@ class PostcardsList:
                 elif row['Type'] == 'Company':
                     self.company_logo_url = row[f'Logo_url_T{self.postcard_number}']
 
+    def assign_bg_image(self, client, clients_bg_img_data):
+        for row in clients_bg_img_data:
+            if row['Company Name'] == self.company_name and str(row["Template Number"]) == str(self.postcard_number):             
+                self.bg_img = row[self.property_data.seller_avatar_group]
+                return True
 
     def assign_tracking_number(self, client):
         self.company_phone_number = client.tracking_numbers[int(self.postcard_number) - 1]
-    
-    def assign_bg_image(self, client):
-        with open(INPUT_CLIENTS_BG_IMG, 'r') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                if row['Company Name'] == self.company_name and str(row["Template Number"]) == str(self.postcard_number):             
-                    self.bg_img = row[self.property_data.seller_avatar_group]
-                    return True
-            print("Could not find a matching background for this postcard number\n\n")
-            print(self)
-            sys.exit(1)
     
     def assign_google_street_view(self):
         if str(self.postcard_number) == "1":
