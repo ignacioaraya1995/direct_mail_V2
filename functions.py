@@ -62,25 +62,30 @@ def load_postcard_rules(fileName):
         rules_data = json.load(file)
     return rules_data
 
+def find_rule(rules_data, seller_avatar_group, sequence_step):
+    for rule in rules_data:
+        if (
+            rule["Group Name"] == seller_avatar_group
+            and str(rule["Sequence Step"]) == str(sequence_step)
+        ):
+            return str(rule["Template Name"]), str(rule["Template Number"]), rule["Gender"]
+    return None, None, None
+
 def get_template_for_property(property_data):
-    
-    if property_data.total_value < 5000 or property_data.total_value == "":
-        sequence_step = ((property_data.num_dm + 1) % 4) + 1
-    else:
-        sequence_step = (property_data.num_dm % 4) + 1
-    
+    sequence_step = (property_data.num_dm % 4) + 1
     property_data.sequence_step = str(sequence_step)
     rules_data = load_postcard_rules(csv_to_json(INPUT_MAIL_RULES))
-    for rule in rules_data:       
-        if (
-            rule["Group Name"]                  == property_data.seller_avatar_group
-            and str(rule["Sequence Step"])      == str(sequence_step)
-        ):              
-            return str(rule["Template Name"]), str(rule["Template Number"]), rule["Gender"]
-        
+    template_name, template_number, gender = find_rule(
+        rules_data, property_data.seller_avatar_group, sequence_step
+    )
     
-    print("[ERROR] Template not found: ",)
-    return None, None
+    if property_data.sequence_step == "2" and template_name is None:
+        print("Checkletter")
+        return "CheckLetter", None, None
+    if template_name is not None:
+        return template_name, template_number, gender
+    print("[ERROR] Template not found")
+    sys.exit(1)
 
 def generate_full_name(postcard_gender, property_data):
     # List of common American male first names

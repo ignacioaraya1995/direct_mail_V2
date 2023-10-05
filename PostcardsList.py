@@ -167,14 +167,17 @@ class PostcardsList:
     def assign_logos(self):
         with open(INPUT_CLIENTS_LOGOS, 'r') as file:
             reader = csv.DictReader(file)
-            for row in reader:
-                if row['Company Name'] == self.company_name and row['Type'].startswith('cred_logo'):
-                    logo_number = str(row['Type'].replace("cred_logo_",""))
+            rows = [row for row in reader]
+            
+        for row in rows:
+            if row['Company Name'] == self.company_name:
+                if row['Type'].startswith('cred_logo'):
+                    logo_number = str(row['Type'].replace("cred_logo_", ""))
                     attribute_name = f"cred_logo_{logo_number}"
-                    setattr(self, attribute_name, row['Logo_url_T' + self.postcard_number])
-                if row['Company Name'] == self.company_name and row['Type'] == 'Company':
-                    company_logo = row['Logo_url_T' + str(self.postcard_number)]
-                    self.company_logo_url = company_logo
+                    setattr(self, attribute_name, row[f'Logo_url_T{self.postcard_number}'])
+                elif row['Type'] == 'Company':
+                    self.company_logo_url = row[f'Logo_url_T{self.postcard_number}']
+
 
     def assign_tracking_number(self, client):
         self.company_phone_number = client.tracking_numbers[int(self.postcard_number) - 1]

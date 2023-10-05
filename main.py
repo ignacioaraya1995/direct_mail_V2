@@ -158,14 +158,16 @@ def read_marketing_list_csv(file_name):
 
 def create_postcard(property_data, client):
     postcard_name, postcard_number, postcard_gender = get_template_for_property(property_data)
+    
+    # sys.exit(0)
     postcard = PostcardsList(property_data, postcard_name, postcard_number, postcard_gender)
     postcard.assign_company_information(client)
     postcard.assign_owner_information(property_data, client)
-    postcard.assign_colors(client)
+    # postcard.assign_colors(client)
     postcard.assign_logos()
-    postcard.assign_tracking_number(client)
-    postcard.assign_bg_image(client)
-    postcard.assign_google_street_view()
+    # postcard.assign_tracking_number(client)
+    # postcard.assign_bg_image(client)
+    # postcard.assign_google_street_view()
     return postcard
 
 def create_csv_files(postcards_list, client):
@@ -282,6 +284,7 @@ def create_csv_files(postcards_list, client):
         "postcard_size",
         "Drop #"
     ]            
+        
     with open("results/" + client.company_name + "/FULL-" +client.company_name + ".csv", "w", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
@@ -511,8 +514,8 @@ if __name__ == "__main__":
             create_postcard(property_data, client) 
             for property_data in client.marketing_list
         ]
-        
+        postcards_list = []
         create_csv_files(postcards_list, client) 
-        print("\tCompleted\n")
+    print("\tCompleted\n")
     delete_csv_files("input")
 
