@@ -1,6 +1,8 @@
 from functions import *
-class PostcardsList:
+
+class MailPiece:
     def __init__(self, 
+                 mail_type,
                  property_data, 
                  postcard_name=None, 
                  postcard_number=None,
@@ -41,6 +43,7 @@ class PostcardsList:
                  block_color_1 = None, 
                  block_color_2 = None
                  ):
+        self.mail_type = mail_type
         self.property_data = property_data
         self.postcard_name = postcard_name
         self.postcard_number = postcard_number
@@ -132,7 +135,7 @@ class PostcardsList:
         self.testimonial_name =         generate_full_name(self.postcard_gender, self.property_data)
         self.qr_code_url =              generate_qr_code_url(client.website_link)
 
-    def assign_owner_information(self, propertyData, client):
+    def assign_owner_information(self, propertyData):
         self.targeted_message_1 =       propertyData.targeted_message_1
         self.targeted_message_2 =       propertyData.targeted_message_2
         self.targeted_message_3 =       propertyData.targeted_message_3
@@ -145,32 +148,42 @@ class PostcardsList:
         self.owner_mailing_state =      propertyData.mailing_state
         self.owner_mailing_zip =        propertyData.mailing_zip
         self.total_value =              add_thousands_separator(propertyData.total_value)
-
-    def assign_colors(self, client, colors_rules_data):
+                    
+    def assign_colors(self, colors_rules_data):
+        prefix = "CL" if self.mail_type == "CheckLetter" else "T" if self.mail_type == "Postcard" else None
+        if not prefix:
+            return
+        
+        variables = ['font_color_1', 'font_color_2', 'font_color_3', 'font_color_4', 'block_color_1', 'block_color_2']
         for row in colors_rules_data:
             if row['Company Name'] == self.company_name:
-                self.font_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_1' else self.font_color_1
-                self.font_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_2' else self.font_color_2
-                self.font_color_3 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_3' else self.font_color_3
-                self.font_color_4 = row["T"+self.postcard_number] if row['Variable'] == 'font_color_4' else self.font_color_4
-                self.block_color_1 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_1' else self.block_color_1
-                self.block_color_2 = row["T"+self.postcard_number] if row['Variable'] == 'block_color_2' else self.block_color_2
-
+                for var in variables:
+                    current_val = getattr(self, var)
+                    setattr(self, var, row[prefix + str(self.postcard_number)] if row['Variable'] == var else current_val)
+        
     def assign_logos(self, clients_logos_data):
+        prefix = "CL" if self.mail_type == "CheckLetter" else "T" if self.mail_type == "Postcard" else None
+        if not prefix:
+            return
+
         for row in clients_logos_data:
             if row['Company Name'] == self.company_name:
                 if row['Type'].startswith('cred_logo'):
                     logo_number = str(row['Type'].replace("cred_logo_", ""))
                     attribute_name = f"cred_logo_{logo_number}"
-                    setattr(self, attribute_name, row[f'Logo_url_T{self.postcard_number}'])
+                    setattr(self, attribute_name, row[f'Logo_url_{prefix}{self.postcard_number}'])
                 elif row['Type'] == 'Company':
-                    self.company_logo_url = row[f'Logo_url_T{self.postcard_number}']
+                    self.company_logo_url = row[f'Logo_url_{prefix}{self.postcard_number}']
 
-    def assign_bg_image(self, client, clients_bg_img_data):
-        for row in clients_bg_img_data:
-            if row['Company Name'] == self.company_name and str(row["Template Number"]) == str(self.postcard_number):             
-                self.bg_img = row[self.property_data.seller_avatar_group]
-                return True
+    def assign_bg_image(self, clients_bg_img_data):
+        if self.mail_type == "Postcard":
+            for row in clients_bg_img_data:
+                if row['Company Name'] == self.company_name and str(row["Template Number"]) == str(self.postcard_number):             
+                    self.bg_img = row[self.property_data.seller_avatar_group]
+                    return True
+        else:
+            self.bg_img = ""
+            return True
 
     def assign_tracking_number(self, client):
         self.company_phone_number = client.tracking_numbers[int(self.postcard_number) - 1]

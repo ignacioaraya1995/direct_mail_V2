@@ -7,6 +7,9 @@ import os
 import re
 import pandas as pd
 import csv
+from collections import defaultdict
+from prettytable import PrettyTable
+
 from vars import *
 
 # Step 1: Read CSV Files Once
@@ -74,22 +77,16 @@ def find_rule(rules_data, seller_avatar_group, sequence_step):
             rule["Group Name"] == seller_avatar_group
             and str(rule["Sequence Step"]) == str(sequence_step)
         ):
-            return str(rule["Template Name"]), str(rule["Template Number"]), rule["Gender"]
-    return None, None, None
+            return str(rule["Template Name"]), str(rule["Template Number"]), rule["Gender"], rule["Type"]
+    return None, None, None, None
 
 def get_template_for_property(property_data):
     sequence_step = (property_data.num_dm % 4) + 1
     property_data.sequence_step = str(sequence_step)
     rules_data = load_postcard_rules(csv_to_json(INPUT_MAIL_RULES))
-    template_name, template_number, gender = find_rule(
-        rules_data, property_data.seller_avatar_group, sequence_step
-    )
-    
-    if property_data.sequence_step == "2" and template_name is None:
-        print("Checkletter")
-        return "CheckLetter", None, None
+    template_name, template_number, gender, mail_type = find_rule(rules_data, property_data.seller_avatar_group, sequence_step)
     if template_name is not None:
-        return template_name, template_number, gender
+        return template_name, template_number, gender, mail_type
     print("[ERROR] Template not found")
 
 def generate_full_name(postcard_gender, property_data):
@@ -226,8 +223,12 @@ def get_text_by_postcard_name(company_name, postcard, text_number, estimate_cash
     with open(INPUT_CLIENTS_TEXTS, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            if row['Company Name'] == company_name and row['Postcard Name'] == "T" + postcard.postcard_number and postcard.version == row['Version']:
-                return row[f"text_{text_number}"]
+            if postcard.mail_type == 'Postcard':
+                if row['Company Name'] == company_name and row['Postcard Name'] == "T" + str(postcard.postcard_number) and postcard.version == row['Version']:
+                    return row[f"text_{text_number}"]
+            if postcard.mail_type == 'CheckLetter':
+                if row['Company Name'] == company_name and row['Postcard Name'] == "CL" + str(postcard.postcard_number) and "a" == row['Version']:
+                    return row[f"text_{text_number}"]
     return None
 
 def add_30_days(drop_date: str) -> str:
@@ -243,3 +244,47 @@ def add_30_days(drop_date: str) -> str:
     exp_date = exp_date_obj.strftime("%Y-%m-%d %H:%M:%S")
     return exp_date
 
+from collections import defaultdict
+
+def calculate_cost(mail_pieces, default_postcard_size="8.5x5.5"):
+    # Pricing dictionary
+    pricing = {
+        'Postcard 4x6': [(2500, 0.541), (5000, 0.501), (10000, 0.481), (20000, 0.466), (35000, 0.456), (float('inf'), 0.451)],
+        'Postcard 4x6 (Google Streetview)': [(2500, 0.561), (5000, 0.521), (10000, 0.501), (20000, 0.486), (35000, 0.466), (float('inf'), 0.461)],
+        'Postcard 8.5x5.5': [(2500, 0.607), (5000, 0.567), (10000, 0.547), (20000, 0.537), (35000, 0.532), (float('inf'), 0.522)],
+        'Postcard 8.5x5.5 (Google Streetview)': [(2500, 0.627), (5000, 0.587), (10000, 0.567), (20000, 0.554), (35000, 0.537), (float('inf'), 0.547)],
+        'Check Letter (Window Envelope)': [(2500, 0.833), (5000, 0.798), (10000, 0.766), (20000, 0.735), (35000, 0.723), (float('inf'), 0.723)],
+    }
+    
+    # Count volume for each category
+    volume_count = defaultdict(int)
+    
+    for piece in mail_pieces:
+        if piece.mail_type == "Postcard":
+            category = f"Postcard {default_postcard_size}"
+            if piece.google_street_view_url:
+                category += " (Google Streetview)"
+        elif piece.mail_type == "CheckLetter":
+            category = "Check Letter (Window Envelope)"
+        else:
+            continue  # Skip invalid types
+        volume_count[category] += 1
+    
+    # Initialize table
+    table = PrettyTable()
+    table.field_names = ["Category", "Volume", "Cost"]
+    
+    # Calculate and print cost
+    total_cost = 0
+    for category, volume in volume_count.items():
+        adjusted_volume = volume if volume >= 2500 else 2500  # Adjust volume for pricing
+        
+        for volume_limit, rate in pricing[category]:
+            if adjusted_volume <= volume_limit:
+                cost = volume * rate  # Using the original 'volume' here for cost computation
+                total_cost += cost
+                table.add_row([category, volume, f"${cost:.2f}"])  # Note: Using 'volume' here for correct print
+                break
+                
+    print(table)
+    print(f"Total Cost: ${total_cost:.2f}")

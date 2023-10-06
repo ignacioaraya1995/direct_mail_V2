@@ -1,7 +1,8 @@
 from vars import *
 from functions import *
+import random
 from Client import Client
-from PostcardsList import PostcardsList
+from MailPiece import MailPiece
 from PropertyData import PropertyData
 
 def read_clients_data(file_name):
@@ -163,15 +164,23 @@ def read_marketing_list_csv(file_name):
     marketing_list = sorted(marketing_list, key=lambda x: int(x.score), reverse=True)
     return marketing_list
 
-def create_postcard(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data):
-    postcard_name, postcard_number, postcard_gender = get_template_for_property(property_data)
-    postcard = PostcardsList(property_data, postcard_name, postcard_number, postcard_gender)
+def create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy):
+    if force_mail_strategy:
+        sequence_step = (property_data.num_dm % 4) + 1
+        property_data.sequence_step = str(sequence_step)
+        postcard_name = ""
+        postcard_number = force_mail_strategy[1]
+        postcard_gender = random.choice(["Male", "Female"])
+        mail_type = force_mail_strategy[0]
+    if force_mail_strategy == False:
+        postcard_name, postcard_number, postcard_gender, mail_type = get_template_for_property(property_data)
+    postcard = MailPiece(mail_type, property_data, postcard_name, postcard_number, postcard_gender)
     postcard.assign_company_information(client)
-    postcard.assign_owner_information(property_data, client)
-    postcard.assign_colors(client, colors_rules_data)
+    postcard.assign_owner_information(property_data)
+    postcard.assign_colors(colors_rules_data)
     postcard.assign_logos(clients_logos_data)
     postcard.assign_tracking_number(client)
-    postcard.assign_bg_image(client, clients_bg_img_data)
+    postcard.assign_bg_image(clients_bg_img_data)
     postcard.assign_google_street_view()
     return postcard
 
@@ -298,6 +307,14 @@ def create_csv_files(postcards_list, client):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
             estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)
+                        
+            if postcard.mail_type == "Postcard":
+                mail_type_id = "T" + str(postcard.postcard_number) + get_random_version(client.company_name, postcard)
+            
+            if postcard.mail_type == "CheckLetter":
+                mail_type_id = "CL" + str(postcard.postcard_number)
+                
+            
             if checking_test_percentage(client):  
                 count_drop_size += 1 
                 writer.writerow({
@@ -369,7 +386,7 @@ def create_csv_files(postcards_list, client):
                     "targeted_message_4":           postcard.property_data.targeted_message_4,
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group,
                     "targeted_test":                postcard.property_data.targeted_testimonial,
-                    "Postcard Name":                "T" + postcard.postcard_number + get_random_version(client.company_name, postcard),
+                    "Postcard Name":                mail_type_id,
                     # "Version":                      get_random_version(client.company_name, postcard),
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
@@ -514,12 +531,35 @@ if __name__ == "__main__":
         print(f"Client: {client.company_name}\tTest Amount: {client.test_percentage}%\tOffer Price/Range: {client.offer_price}")     
         create_client_folder(client)
         client.add_marketing_list(read_marketing_list_csv(find_marketingList(client.company_name)))
-        postcards_list = [
-            create_postcard(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data) 
-            for property_data in client.marketing_list
-        ]
-        print("x")
-        create_csv_files(postcards_list, client)
+        mail_list = []
+        force_strategy = True
+        
+        if force_strategy:
+            counters = {"CheckLetter": 0, "Postcard (Google Streetview)": 0, "Postcard": 0}
+            limits = [("CheckLetter", 2000), ("Postcard (Google Streetview)", 1000), ("Postcard", 4775)]
+            for mail_type, limit in limits:
+                for property_data in client.marketing_list[counters[mail_type]:]:
+                    if counters[mail_type] >= limit:
+                        break
+                    if mail_type == "CheckLetter":
+                        force_mail_strategy = ["CheckLetter", 2]
+                        mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy))
+                    elif mail_type == "Postcard (Google Streetview)":
+                        force_mail_strategy = ["Postcard", 1]
+                        mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy))
+                    elif mail_type == "Postcard":
+                        force_mail_strategy = ["Postcard", random.choice([3,4])]
+                        mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy))
+                    counters[mail_type] += 1
+                    
+        if force_strategy == False:
+            for property_data in client.marketing_list:
+                mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_strategy))
+            
+        
+            
+        calculate_cost(mail_list)
+        create_csv_files(mail_list, client)
          
     print("\tCompleted\n")
     delete_csv_files("input")
