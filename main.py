@@ -174,6 +174,8 @@ def create_mail_piece(property_data, client, colors_rules_data, clients_logos_da
         mail_type = force_mail_strategy[0]
     if force_mail_strategy == False:
         postcard_name, postcard_number, postcard_gender, mail_type = get_template_for_property(property_data)
+        
+        
     postcard = MailPiece(mail_type, property_data, postcard_name, postcard_number, postcard_gender)
     postcard.assign_company_information(client)
     postcard.assign_owner_information(property_data)
@@ -255,7 +257,7 @@ def create_csv_files(postcards_list, client):
         "TARGETED GROUP NAME",
         "targeted_test", # Targeted group message
         "Postcard Name",
-        # "Version",
+        "Version",
         "seller_full_name",
         "seller_first_name",
         "seller_mailing_add",
@@ -306,13 +308,16 @@ def create_csv_files(postcards_list, client):
         for i, postcard in enumerate(postcards_list):
             seller_mailing_add  = postcard.property_data.mailing_address + ", " + postcard.property_data.mailing_city + " " + postcard.property_data.mailing_state + ", " + postcard.property_data.mailing_zip
             company_mailing_add = client.company_mailing_address + ", " + client.company_mailing_city + " " + client.company_mailing_state + ", " + client.company_mailing_zip
-            estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)
-                        
+            estimate_cash_offer = calculate_estimate_cash_offer(postcard.property_data.total_value, client.offer_price)          
             if postcard.mail_type == "Postcard":
-                mail_type_id = "T" + str(postcard.postcard_number) + get_random_version(client.company_name, postcard)
+                mail_type_id = "T" + str(postcard.postcard_number)
+                mail_version = get_random_version(client.company_name, postcard)            
+
             
             if postcard.mail_type == "CheckLetter":
                 mail_type_id = "CL" + str(postcard.postcard_number)
+                mail_version = "a"          
+
                 
             
             if checking_test_percentage(client):  
@@ -387,7 +392,7 @@ def create_csv_files(postcards_list, client):
                     "TARGETED GROUP NAME":          postcard.property_data.seller_avatar_group,
                     "targeted_test":                postcard.property_data.targeted_testimonial,
                     "Postcard Name":                mail_type_id,
-                    # "Version":                      get_random_version(client.company_name, postcard),
+                    "Version":                      mail_version,
                     "seller_full_name":             postcard.property_data.owner_full_name,
                     "seller_first_name":            postcard.property_data.owner_first_name,
                     "seller_mailing_add":           seller_mailing_add,
@@ -532,17 +537,17 @@ if __name__ == "__main__":
         create_client_folder(client)
         client.add_marketing_list(read_marketing_list_csv(find_marketingList(client.company_name)))
         mail_list = []
-        force_strategy = True
+        FORCE_STRATEGY = True
         
-        if force_strategy:
+        if FORCE_STRATEGY:
             counters = {"CheckLetter": 0, "Postcard (Google Streetview)": 0, "Postcard": 0}
-            limits = [("CheckLetter", 2000), ("Postcard (Google Streetview)", 1000), ("Postcard", 4775)]
+            limits = [("CheckLetter", 9999999), ("Postcard (Google Streetview)", 0), ("Postcard", 0)]
             for mail_type, limit in limits:
                 for property_data in client.marketing_list[counters[mail_type]:]:
                     if counters[mail_type] >= limit:
                         break
                     if mail_type == "CheckLetter":
-                        force_mail_strategy = ["CheckLetter", 2]
+                        force_mail_strategy = ["CheckLetter", random.choice([1, 2])]
                         mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy))
                     elif mail_type == "Postcard (Google Streetview)":
                         force_mail_strategy = ["Postcard", 1]
@@ -552,9 +557,9 @@ if __name__ == "__main__":
                         mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy))
                     counters[mail_type] += 1
                     
-        if force_strategy == False:
+        if FORCE_STRATEGY == False:
             for property_data in client.marketing_list:
-                mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_strategy))
+                mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, FORCE_STRATEGY))
             
         
             

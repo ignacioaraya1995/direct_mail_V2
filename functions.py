@@ -241,7 +241,7 @@ def add_30_days(drop_date: str) -> str:
             return ""
 
     exp_date_obj = drop_date_obj + timedelta(days=30)
-    exp_date = exp_date_obj.strftime("%Y-%m-%d %H:%M:%S")
+    exp_date = exp_date_obj.strftime("%Y-%m-%d")
     return exp_date
 
 from collections import defaultdict
@@ -276,6 +276,7 @@ def calculate_cost(mail_pieces, default_postcard_size="8.5x5.5"):
     
     # Calculate and print cost
     total_cost = 0
+    total_volume = 0
     for category, volume in volume_count.items():
         adjusted_volume = volume if volume >= 2500 else 2500  # Adjust volume for pricing
         
@@ -283,8 +284,11 @@ def calculate_cost(mail_pieces, default_postcard_size="8.5x5.5"):
             if adjusted_volume <= volume_limit:
                 cost = volume * rate  # Using the original 'volume' here for cost computation
                 total_cost += cost
+                total_volume += volume
                 table.add_row([category, volume, f"${cost:.2f}"])  # Note: Using 'volume' here for correct print
                 break
                 
     print(table)
+    print(f"Total Volume: {total_volume}")
     print(f"Total Cost: ${total_cost:.2f}")
+
