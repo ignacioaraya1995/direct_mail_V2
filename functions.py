@@ -85,6 +85,8 @@ def get_template_for_property(property_data):
     property_data.sequence_step = str(sequence_step)
     rules_data = load_postcard_rules(csv_to_json(INPUT_MAIL_RULES))
     template_name, template_number, gender, mail_type = find_rule(rules_data, property_data.seller_avatar_group, sequence_step)
+    if template_name == "Checkletter":
+        print("Checkletter")
     if template_name is not None:
         return template_name, template_number, gender, mail_type
     print("[ERROR] Template not found")
@@ -176,12 +178,15 @@ def calculate_estimate_cash_offer(total_value, offer_price):
         high_offer = round(total_value * high, -2)
         return f"${add_thousands_separator(low_offer)} - ${add_thousands_separator(high_offer)}"
     else:
-        offer = int(total_value) * (float(offer_price) / 100)
-        if offer < 15000 and float(offer_price) > 0:
+        try:
+            offer = int(float(total_value)) * (float(offer_price) / 100)
+            if offer < 15000 and float(offer_price) > 0:
+                return "TBD"
+            else:
+                rounded_offer = round(offer, -2)  # Round to the nearest hundredth
+                return f"${add_thousands_separator(int(rounded_offer))}"
+        except:
             return "TBD"
-        else:
-            rounded_offer = round(offer, -2)  # Round to the nearest hundredth
-            return f"${add_thousands_separator(int(rounded_offer))}"
              
 def get_random_version(company_name, postcard):
     available_versions = set()

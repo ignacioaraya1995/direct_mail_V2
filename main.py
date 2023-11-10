@@ -162,6 +162,7 @@ def read_marketing_list_csv(file_name):
                                          targeted_message_1, targeted_message_2, targeted_message_3, targeted_message_4)
             marketing_list.append(property_data)
     marketing_list = sorted(marketing_list, key=lambda x: int(x.score), reverse=True)
+    # marketing_list = sorted(marketing_list, key=lambda x: int(x.score))
     return marketing_list
 
 def create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy):
@@ -172,9 +173,9 @@ def create_mail_piece(property_data, client, colors_rules_data, clients_logos_da
         postcard_number = force_mail_strategy[1]
         postcard_gender = random.choice(["Male", "Female"])
         mail_type = force_mail_strategy[0]
+        
     if force_mail_strategy == False:
         postcard_name, postcard_number, postcard_gender, mail_type = get_template_for_property(property_data)
-        
         
     postcard = MailPiece(mail_type, property_data, postcard_name, postcard_number, postcard_gender)
     postcard.assign_company_information(client)
@@ -537,11 +538,11 @@ if __name__ == "__main__":
         create_client_folder(client)
         client.add_marketing_list(read_marketing_list_csv(find_marketingList(client.company_name)))
         mail_list = []
-        FORCE_STRATEGY = True
+        FORCE_STRATEGY = False
         
         if FORCE_STRATEGY:
             counters = {"CheckLetter": 0, "Postcard (Google Streetview)": 0, "Postcard": 0}
-            limits = [("CheckLetter", 9999999), ("Postcard (Google Streetview)", 0), ("Postcard", 0)]
+            limits = [("CheckLetter", 1000000), ("Postcard (Google Streetview)", 0), ("Postcard", 0)]
             for mail_type, limit in limits:
                 for property_data in client.marketing_list[counters[mail_type]:]:
                     if counters[mail_type] >= limit:
@@ -553,7 +554,8 @@ if __name__ == "__main__":
                         force_mail_strategy = ["Postcard", 1]
                         mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy))
                     elif mail_type == "Postcard":
-                        force_mail_strategy = ["Postcard", random.choice([3,4])]
+                        force_mail_strategy = ["Postcard", random.choice([2,4])]
+                        # force_mail_strategy = ["Postcard", 3]
                         mail_list.append(create_mail_piece(property_data, client, colors_rules_data, clients_logos_data, clients_bg_img_data, force_mail_strategy))
                     counters[mail_type] += 1
                     
