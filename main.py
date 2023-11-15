@@ -538,7 +538,7 @@ if __name__ == "__main__":
         create_client_folder(client)
         client.add_marketing_list(read_marketing_list_csv(find_marketingList(client.company_name)))
         mail_list = []
-        FORCE_STRATEGY = False
+        FORCE_STRATEGY = True
         
         if FORCE_STRATEGY:
             counters = {"CheckLetter": 0, "Postcard (Google Streetview)": 0, "Postcard": 0}

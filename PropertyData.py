@@ -85,55 +85,98 @@ class PropertyData:
             self.mailing_zip        = self.golden_zip_code
 
     def _remove_single_letters_and_titles(self, full_name):
-        return ' '.join(word for word in full_name.split() if len(word) > 1 and word.lower() not in ['jr', 'sr'])
+        words = full_name.split()
+
+        # Handle 'tr' (trustee) where name order might be reversed
+        if 'tr' in [word.lower() for word in words]:
+            # Assuming format: [Last Name] [First Name] [Title]
+            last_name = words[0]
+            first_name = ' '.join(words[1:-1])  # Exclude the 'tr'
+            return first_name.strip(), last_name.strip()
+
+        return ' '.join(words)  # Do not split here
 
     def _split_name(self, full_name):
-        cleaned_name = re.sub(r'[^\w\s]', '', full_name)
+        cleaned_name = re.sub(r'[^\w\s]', '', str(full_name))
         name_parts = cleaned_name.split()
-        return ' '.join(name_parts[:-1]), name_parts[-1] if len(name_parts) > 1 else ''
+
+        if len(name_parts) > 1:
+            # Filter out single-letter words, unless they are essential parts of the name
+            essential_parts = [word for word in name_parts if len(word) > 1 or (len(word) == 1 and len(name_parts) == 2)]
+            
+            # If after filtering, only one word remains, it becomes the first name
+            if len(essential_parts) == 1:
+                first_name = essential_parts[0]
+                last_name = ''
+            else:
+                first_name = essential_parts[0]  # First name is the first essential part
+                last_name = ' '.join(essential_parts[1:])  # Last name is the rest of the essential parts
+
+        else:
+            return cleaned_name, ''  # In case there's only one word
+
+        return first_name.strip(), last_name.strip()
 
     def _is_valid_name(self, name):
         return name and bool(re.match('^[a-zA-Z\s]+$', name)) and len(name) > 1
 
     def _correct_name_order(self, first_name, last_name):
-        # If either name part is more common as a first name, swap them
-        if first_name.title() in common_first_names and last_name.title() not in common_first_names:
-            return first_name, last_name
-        elif last_name.title() in common_first_names and first_name.title() not in common_first_names:
-            return last_name, first_name
-        return first_name, last_name
+        # Remove single-letter words from first and last names unless they are the only components
+        name_terms = [
+        "jr", "sr", "tr", "ii", "iii", "iv", "esq", "phd", "md", 
+        "aka", "fka", "tod", "dba", "mba", "cpa"
+    ]
+        first_name_parts = first_name.split()
+        last_name_parts = last_name.split()
+
+        if len(first_name_parts) > 1:
+            first_name = ' '.join(word for word in first_name_parts if len(word) > 1)
+        if len(last_name_parts) > 1:
+            last_name = ' '.join(word for word in last_name_parts if len(word) > 1)
+
+        # Check against common names lists
+        first_in_first_names = first_name.title() in common_first_names
+        first_in_last_names = first_name.title() in common_last_names
+        last_in_first_names = last_name.title() in common_first_names
+        last_in_last_names = last_name.title() in common_last_names
+
+        # Swap names only under specific conditions
+        if (first_in_last_names and not first_in_first_names and not last_in_last_names) or \
+        (last_in_first_names and not last_in_last_names and not first_in_first_names):
+            return last_name.strip(), first_name.strip()
+        
+        # Remove name terms from first and last names
+        first_name_parts = first_name.split()
+        last_name_parts = last_name.split()
+
+        first_name = ' '.join(word for word in first_name_parts if word.lower() not in name_terms)
+        last_name = ' '.join(word for word in last_name_parts if word.lower() not in name_terms)
+        
+        # If the last name consists of two or more words with two or more characters each, take only the last word
+        last_name_parts = last_name.split()
+        if len(last_name_parts) > 1 and all(len(word) > 1 for word in last_name_parts):
+            last_name = last_name_parts[-1]
+
+        # Border case: if first name is empty and last name has value
+                    
+        return first_name.strip(), last_name.strip()
 
     def clean_owner_info(self):
         self.owner_full_name = str(self.owner_full_name).strip(" ,-.")
-        
-        # If "llc" is in the name, convert it to "LLC"
-        if 'llc' or "trust" or "investment" or "properties" or "prop" or "capital" or "acquisitions" in self.owner_full_name.lower():
+        # Define a list of business entity identifiers
+        business_entities = ["llc", "trust", "investment", "properties", "prop", "capital", "acquisitions", "association", "inc", "incorporated", "and", "council", "rental"]
+        name_words = self.owner_full_name.lower().split()
+        if any(entity in name_words for entity in business_entities):
             self.owner_full_name = self.owner_full_name.lower().title().replace('Llc', 'LLC')
             self.owner_first_name = ""
             self.owner_last_name = ""
             return
-
-        # Remove single-letter words (like middle initials) and 'Jr' and 'Sr' from full_name
+            
         cleaned_full_name = self._remove_single_letters_and_titles(self.owner_full_name)
         first_name_candidate, last_name_candidate = self._split_name(cleaned_full_name)
-        
-        # If the pre-existing first name is not valid, use the split first name candidate
-        if not self._is_valid_name(self.owner_first_name):
-            if self._is_valid_name(first_name_candidate):
-                self.owner_first_name = first_name_candidate
-            else:
-                self.owner_first_name = self.owner_full_name
-        
-        # Reset last_name to avoid repetition when first_name gets updated
-        self.owner_last_name = None
-
-        # If the pre-existing last name is not valid, use the split last name candidate
-        if not self._is_valid_name(self.owner_last_name):
-            if self._is_valid_name(last_name_candidate):
-                self.owner_last_name = last_name_candidate
-            else:
-                self.owner_last_name = self.owner_full_name
-
-        # Correct the name order using common first names list
+        self.owner_first_name = first_name_candidate if self._is_valid_name(first_name_candidate) else ''
+        self.owner_last_name = last_name_candidate if self._is_valid_name(last_name_candidate) else ''
         self.owner_first_name, self.owner_last_name = self._correct_name_order(self.owner_first_name, self.owner_last_name)
-
+        if not self.owner_first_name and self.owner_last_name:
+            remaining_name = ' '.join(name_parts for name_parts in self.owner_full_name.split() if name_parts != self.owner_last_name)
+            self.owner_first_name = remaining_name

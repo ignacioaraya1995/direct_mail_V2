@@ -36,3 +36,6 @@ results/.DS_Store
 input/.DS_Store
 input/template_data.xlsx
 results/.DS_Store
+*.pyc
+.DS_Store
+.DS_Store

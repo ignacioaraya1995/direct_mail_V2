@@ -20,15 +20,15 @@ common_first_names = [
     "Peter", "Harold", "Douglas", "Henry", "Carl", "Arthur", "Roger", "Keith", "Jeremy", "Terry",
     "Lawrence", "Sean", "Christian", "Albert", "Joe", "Ethan", "Austin", "Jesse", "Willie", "Billy",
     "Bryan", "Bruce", "Ralph", "Roy", "Jordan", "Eugene", "Wayne", "Alan", "Juan", "Louis", "Russell",
-    "Gabriel", "Randy", "Philip", "Harry", "Vincent", "Noah", "Bobby", "Johnny", "Logan", "Virginia"
+    "Gabriel", "Randy", "Philip", "Harry", "Vincent", "Noah", "Bobby", "Johnny", "Logan", "Virginia", "Jerrie", "Danny", "Gary"
 ]
 
 common_last_names = [
-    "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
-    "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Lee",
+    "Smith", "White", "Black", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
+    "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Moore", "Jackson", "Lee",
     "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker",
-    "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green",
-    "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Gomez",
+    "Young", "Allen", "King", "Wright", "Torres", "Nguyen", "Hill", "Flores", "Green",
+    "Adams", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Gomez",
     "Phillips", "Evans", "Turner", "Diaz", "Parker", "Cruz", "Edwards", "Collins", "Reyes", "Stewart",
     "Morris", "Morales", "Murphy", "Cook", "Rogers", "Gutierrez", "Ortiz", "Morgan", "Cooper", "Peterson",
     "Bailey", "Reed", "Kelly", "Howard", "Ramos", "Kim", "Cox", "Ward", "Richardson", "Watson", "Brooks",
