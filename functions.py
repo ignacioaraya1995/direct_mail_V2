@@ -9,7 +9,6 @@ import pandas as pd
 import csv
 from collections import defaultdict
 from prettytable import PrettyTable
-
 from vars import *
 
 # Step 1: Read CSV Files Once
@@ -248,8 +247,6 @@ def add_30_days(drop_date: str) -> str:
     exp_date_obj = drop_date_obj + timedelta(days=30)
     exp_date = exp_date_obj.strftime("%Y-%m-%d")
     return exp_date
-
-from collections import defaultdict
 
 def calculate_cost(mail_pieces, default_postcard_size="8.5x5.5"):
     # Pricing dictionary

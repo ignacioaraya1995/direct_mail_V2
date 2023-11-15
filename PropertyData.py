@@ -107,10 +107,10 @@ class PropertyData:
         self.owner_full_name = str(self.owner_full_name).strip(" ,-.")
         
         # If "llc" is in the name, convert it to "LLC"
-        if 'llc' in self.owner_full_name.lower():
+        if 'llc' or "trust" or "investment" or "properties" or "prop" or "capital" or "acquisitions" in self.owner_full_name.lower():
             self.owner_full_name = self.owner_full_name.lower().title().replace('Llc', 'LLC')
-            self.owner_first_name = self.owner_full_name.lower().title().replace('Llc', 'LLC')
-            self.owner_last_name = self.owner_full_name.lower().title().replace('Llc', 'LLC')
+            self.owner_first_name = ""
+            self.owner_last_name = ""
             return
 
         # Remove single-letter words (like middle initials) and 'Jr' and 'Sr' from full_name
